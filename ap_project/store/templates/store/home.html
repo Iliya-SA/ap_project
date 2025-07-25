@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>صفحه اصلی</title>
+</head>
+<body>
+    <h1>به فروشگاه لوازم آرایشی خوش آمدید!</h1>
+
+    {% if user.is_authenticated %}
+        <p>سلام {{ user.username }} 👋</p>
+        <a href="{% url 'signout' %}">خروج</a>
+    {% else %}
+        <a href="{% url 'signin' %}">ورود</a> |
+        <a href="{% url 'signup' %}">ثبت‌نام</a>
+    {% endif %}
+</body>
+</html>
