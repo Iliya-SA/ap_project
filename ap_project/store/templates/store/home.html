@@ -9,7 +9,7 @@
 
     {% if user.is_authenticated %}
         <p>سلام {{ user.username }} 👋</p>
-        <a href="{% url 'signout' %}">خروج</a>
+        <p><a href="{% url 'profile' %}">پروفایل من</a></p> 
     {% else %}
         <a href="{% url 'signin' %}">ورود</a> |
         <a href="{% url 'signup' %}">ثبت‌نام</a>

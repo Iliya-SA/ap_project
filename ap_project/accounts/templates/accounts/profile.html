@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>پروفایل کاربر</title>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>پروفایل من</h2>
+        <p><strong>نام:</strong> {{ user.first_name }}</p>
+        <p><strong>نام خانوادگی:</strong> {{ user.last_name }}</p>
+        <p><strong>نام کاربری:</strong> {{ user.username }}</p>
+        <p><strong>ایمیل:</strong> {{ user.email }}</p>
+        <p><strong>نوع پوست:</strong> <span dir="rtl" style="text-align: right;">{{ user.profile.skin_type }}</span></p>
+        <p><strong>بیماری‌های پوستی:</strong> <span dir="rtl" style="text-align: right;">{{ user.profile.concerns }}</span></p>
+        
+
+
+        <hr>
+        <p><a href="{% url 'edit_profile' %}">ویرایش و تکمیل اطلاعات</a></p>
+        <p><a href="{% url 'signout' %}">خروج از حساب</a></p>
+        <a href="{% url 'home' %}">بازگشت به صفحه اصلی</a>
+    </div>
+</body>
+</html>
