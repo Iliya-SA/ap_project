@@ -23,6 +23,8 @@ urlpatterns = [
     path('', include('store.urls')),       # صفحه اصلی
     path('accounts/', include('accounts.urls')),  # صفحات ورود/ثبت‌نام
     path('products/', include('products.urls')), # محصولات
+    path('cart/', include('cart.urls')),  #سبد خرید
+    path('orders/', include('orders.urls')),
 ]
 
 if settings.DEBUG:
