@@ -14,9 +14,16 @@ class Product(models.Model):
     ('کرم ضدجوش', 'کرم ضدجوش'),
     ('کرم شب', 'کرم شب'),
 ]
+    SKIN_TYPE_CHOICES = [
+    ('خشک', 'خشک'),
+    ('چرب', 'چرب'),
+    ('نرمال', 'نرمال'),
+    ('ترکیبی', 'ترکیبی'),
+    ('حساس', 'حساس'),
+]
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     description = models.TextField()
-    skin_types = models.CharField(max_length=100)
+    skin_type = models.CharField(max_length=50, choices=SKIN_TYPE_CHOICES)
     concerns_targeted = models.CharField(max_length=200)
     tags = models.JSONField(default=list)
     price = models.IntegerField()
