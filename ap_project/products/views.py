@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import DetailView, ListView
-
+from django.db.models import Avg
 
 class ProductDetailView(DetailView):
     model = Product
@@ -14,9 +14,31 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        product = self.object
 
-        context['recent_comments'] = self.object.comments.order_by('-created_at')[:3]
+        # نظرات اخیر
+        context['recent_comments'] = product.comments.order_by('-created_at')[:3]
+
+        # محصولات مرتبط با همان نوع پوست (skin_type) با بیشترین میانگین امتیاز
+        related_products = Product.objects.filter(
+            skin_type=product.skin_type
+        ).exclude(id=product.id).annotate(
+            avg_rating=Avg('comments__rating')
+        ).order_by('-avg_rating')[:5]
+        context['related_products'] = related_products
+
+        # محصولات همان برند با بیشترین میانگین امتیاز
+        brand_products = Product.objects.filter(
+            brand=product.brand
+        ).exclude(id=product.id).annotate(
+            avg_rating=Avg('comments__rating')
+        ).order_by('-avg_rating')[:5]
+        context['brand_products'] = brand_products
+
         return context
+
+        return context
+
 
 class ProductCommentsView(ListView):
     model = Comment
