@@ -1,11 +1,13 @@
 from django.views.generic import DetailView
-from .models import Product, Comment
+from .models import Product, Comment, Favorite
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 
 class ProductDetailView(DetailView):
     model = Product
@@ -15,6 +17,7 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product = self.object
+        user = self.request.user
 
         # نظرات اخیر
         context['recent_comments'] = product.comments.order_by('-created_at')[:3]
@@ -35,7 +38,11 @@ class ProductDetailView(DetailView):
         ).order_by('-avg_rating')[:5]
         context['brand_products'] = brand_products
 
-        return context
+        # وضعیت علاقه‌مندی محصول برای کاربر فعلی
+        if user.is_authenticated:
+            context['is_favorite'] = Favorite.objects.filter(user=user, product=product).exists()
+        else:
+            context['is_favorite'] = False
 
         return context
 
@@ -69,3 +76,14 @@ class AddCommentView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('product-detail', kwargs={'pk': self.kwargs['pk']})
+
+@login_required
+def toggle_favorite(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+
+    if not created:
+        favorite.delete()  # اگه قبلاً بود حذفش کن
+    return redirect(request.META.get('HTTP_REFERER', 'store'))
+
+

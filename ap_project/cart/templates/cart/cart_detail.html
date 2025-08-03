@@ -1,15 +1,54 @@
+{% load humanize %}
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <title>سبد خرید شما</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <style>
+        @font-face {
+            font-family: 'Vazir';
+            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face/Vazir-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
             direction: rtl;
             text-align: right;
             background-color: #f8f9fa;
+            font-family: 'Vazir', sans-serif;
         }
+        /* نوار بالا */
+        .top-bar {
+            background: linear-gradient(90deg, #0d6efd, #6610f2);
+            color: white;
+            padding: 10px 20px;
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
+            height: 48px;
+        }
+        .top-bar span {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .top-bar a {
+            color: white;
+            font-weight: 600;
+            background-color: rgba(255 255 255 / 0.2);
+            padding: 6px 18px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .top-bar a:hover {
+            background-color: rgba(255 255 255 / 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        /* کارت‌های محصول در سبد */
         .cart-item {
             background: white;
             border-radius: 8px;
@@ -18,6 +57,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
         }
         .cart-item img {
             width: 120px;
@@ -26,6 +66,14 @@
         }
         .cart-item-details {
             flex-grow: 1;
+        }
+        .cart-item-details h5 {
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .cart-item-details p {
+            margin-bottom: 3px;
+            color: #555;
         }
         .cart-item-quantity input {
             width: 60px;
@@ -36,30 +84,37 @@
             padding: 20px;
             border-radius: 8px;
             font-size: 1.3rem;
-            font-weight: bold;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+            margin-top: 15px;
         }
         .btn-complete {
             width: 100%;
             margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h2 class="mb-4">سبد خرید شما</h2>
+<div class="top-bar">
+    <span>سبد خرید</span>
+    <a href="{% url 'store' %}">بازگشت به صفحه اصلی</a>
+</div>
 
+<div class="container mt-4">
     {% if cart.items.count > 0 %}
         <form method="POST" action="{% url 'update-cart' %}">
             {% csrf_token %}
             {% for item in cart.items.all %}
-                <div class="cart-item shadow-sm">
+                <div class="cart-item">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                     <div class="cart-item-details">
                         <h5>{{ item.product.name }}</h5>
-                        <p class="text-muted mb-1">{{ item.product.brand }}</p>
-                        <p class="mb-1">دسته‌بندی: {{ item.product.category }}</p>
-                        <p class="text-success mb-0">{{ item.product.price|floatformat:0 }} تومان</p>
+                        <p class="text-muted">{{ item.product.brand }}</p>
+                        <p>دسته‌بندی: {{ item.product.category }}</p>
+                        <p class="text-success">{{ item.product.price|intcomma }} تومان</p>
                     </div>
                     <div class="cart-item-quantity">
                         <label for="quantity_{{ item.id }}" class="form-label">تعداد:</label>
@@ -68,7 +123,7 @@
                 </div>
             {% endfor %}
             <div class="total-section text-end">
-                جمع کل: {{ cart.total_price|floatformat:0 }} تومان
+                جمع کل: {{ cart.total_price|intcomma }} تومان
             </div>
             <button type="submit" class="btn btn-primary btn-complete">بروزرسانی تعداد</button>
         </form>
@@ -83,11 +138,12 @@
         </a>
 
     {% else %}
-        <div class="alert alert-info">
+        <div class="alert alert-info mt-4">
             سبد خرید شما خالی است.
         </div>
     {% endif %}
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

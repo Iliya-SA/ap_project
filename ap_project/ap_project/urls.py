@@ -25,6 +25,7 @@ urlpatterns = [
     path('products/', include('products.urls')), # محصولات
     path('cart/', include('cart.urls')),  #سبد خرید
     path('orders/', include('orders.urls')),
+    path('context/', include('context.urls')),
 ]
 
 if settings.DEBUG:
