@@ -1,0 +1,50 @@
+{% extends 'store/base.html' %}
+
+{% block title %}تماس با ما و انتقادات{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <h2 class="mb-4 text-center">تماس با ما</h2>
+        <p class="lead text-center">
+            اگر سوالی دارید یا می‌خواهید با ما تماس بگیرید، لطفاً از اطلاعات زیر استفاده کنید یا فرم زیر را پر کنید.
+        </p>
+
+        <div class="card mb-5 shadow-sm">
+            <div class="card-body">
+                <p><strong>آدرس:</strong>************************</p>
+                <p><strong>تلفن:</strong> #############</p>
+                <p><strong>ایمیل:</strong> info@example.com</p>
+            </div>
+        </div>
+
+        <h2 class="mb-4 text-center">انتقادات و پیشنهادات</h2>
+        <p class="lead text-center">
+            نظرات و پیشنهادات شما برای ما بسیار ارزشمند است. لطفاً فرم زیر را پر کنید تا ما بتوانیم بهتر خدمت‌رسانی کنیم.
+        </p>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">نام و نام خانوادگی</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="نام شما" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">ایمیل</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="ایمیل شما" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">متن پیام</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" placeholder="متن انتقاد یا پیشنهاد خود را وارد کنید" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">ارسال</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

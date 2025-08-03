@@ -1,17 +1,17 @@
 from django.db import models
 from django.db.models import Avg
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from django.contrib.auth.models import User
 
 class Product(models.Model):
     name = models.CharField(max_length = 100)
     brand = models.CharField(max_length = 100)
     CATEGORY_CHOICES = [
-    ('کرم آبرسان', 'کرم آبرسان'),
-    ('کرم ضدآفتاب', 'کرم ضدآفتاب'),
-    ('کرم ضدچروک', 'کرم ضدچروک'),
-    ('کرم روشن‌کننده', 'کرم روشن‌کننده'),
-    ('کرم ضدجوش', 'کرم ضدجوش'),
+    ('آبرسان', 'آبرسان'),
+    ('ضدآفتاب', 'ضدآفتاب'),
+    ('ضدچروک', 'ضدچروک'),
+    ('روشن‌کننده', 'روشن‌کننده'),
+    ('ضدجوش', 'ضدجوش'),
     ('کرم شب', 'کرم شب'),
 ]
     SKIN_TYPE_CHOICES = [
@@ -48,3 +48,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.product.name} ({self.rating})"
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')  # جلوگیری از تکرار علاقه‌مندی
+
+    def __str__(self):
+        return f"{self.user.username} ❤️ {self.product.name}"
