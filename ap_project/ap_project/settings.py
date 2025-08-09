@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'orders',
     'django.contrib.humanize',
     'context',
+    'routine',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
