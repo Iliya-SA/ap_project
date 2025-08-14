@@ -1,43 +1,42 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from .models import RoutinePlan, RoutineStep
 from .serializers import RoutinePlanSerializer
-from products.models import Product
 from accounts.models import Profile
+from .utils import select_products_from_quiz  # ✅ add
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def quiz_view(request):
-    """
-    Accepts quiz answers, generates RoutinePlan, and returns it.
-    """
     user = request.user
-    data = request.data  # answers from quiz
+    data = request.data
 
     skin_type = data.get('skin_type')
     concerns = data.get('concerns', [])
     preferences = data.get('preferences', [])
 
-    # Get user profile or create
     profile, _ = Profile.objects.get_or_create(user=user)
     profile.preferences = preferences
     profile.save()
 
-    # Create routine plan
-    plan = RoutinePlan.objects.create(user_profile=profile, name="My Skincare Routine")
+    # If user retakes the quiz, drop old plan (simple, predictable)
+    RoutinePlan.objects.filter(user=profile).delete()
 
-    # Example product selection logic (very simple)
-    products = Product.objects.all()[:3]  # TODO: filter based on answers
-    step_names = ["Cleanser", "Moisturizer", "Sunscreen"]
+    steps, plan_name = select_products_from_quiz(skin_type, concerns, preferences)
 
-    for i, product in enumerate(products):
+    # Create plan
+    plan = RoutinePlan.objects.create(user=profile, plan_name=plan_name)
+
+    # Create steps
+    for idx, (step_name, product) in enumerate(steps, start=1):
         RoutineStep.objects.create(
-            plan=plan,
-            step_number=i + 1,
-            product=product,
-            instructions=f"Use {product.name} as your {step_names[i]}"
+            routine=plan,
+            step_name=step_name,
+            product=product
         )
 
     serializer = RoutinePlanSerializer(plan)
-    return Response(serializer.data)
+    return Response(serializer.data, status=201)
