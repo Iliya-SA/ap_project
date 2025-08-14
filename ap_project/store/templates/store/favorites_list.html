@@ -1,0 +1,27 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+
+{% block title %}محصولات مورد علاقه شما{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">محصولات مورد علاقه شما</h3>
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 col-sm-6">
+        <div class="product-card">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+            <h6>{{ product.name }}</h6>
+            <p class="text-success fw-bold">{{ product.price|intcomma }} تومان</p>
+            <p class="mb-2 d-flex align-items-center gap-1">
+                <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+                <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+            </p>
+            <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>شما هیچ محصول مورد علاقه‌ای ندارید.</p>
+    {% endfor %}
+</div>
+{% endblock %}
