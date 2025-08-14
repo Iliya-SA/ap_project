@@ -40,3 +40,13 @@ def quiz_view(request):
 
     serializer = RoutinePlanSerializer(plan)
     return Response(serializer.data, status=201)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def my_routine(request):
+    profile = request.user.profile
+    plan = RoutinePlan.objects.filter(user=profile).order_by("-created_at").first()
+    if not plan:
+        return Response({"detail": "No routine found"}, status=404)
+    return Response(RoutinePlanSerializer(plan).data)
