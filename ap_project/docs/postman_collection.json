@@ -1,0 +1,1444 @@
+{
+	"info": {
+		"_postman_id": "473dfb41-7478-48a8-aed0-0a75d4530512",
+		"name": "export",
+		"description": "# Introduction\nExport APIs\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47604745",
+		"_collection_link": "https://www.postman.com/reon-capillary0/workspace/reon-s-public-workspace/collection/8349800-473dfb41-7478-48a8-aed0-0a75d4530512?action=share&source=collection_link&creator=47604745"
+	},
+	"item": [
+		{
+			"name": "isAlive",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-CAP-API-AUTH-ORG-ID",
+						"value": "0"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "x-CAP-API-AUTH-MODULE",
+						"value": "export"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/0/isalive",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"0",
+						"isalive"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createtemplate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"kpiIds\":[{\n\t\t\"kpiRefId\":\"58d10a04659bbdf0ebce0c78\"\n\t}],\n\t\"partitionDetails\":[{\n\t\t\"dimName\":\"event_date\"\n\t}],\n\t\"dimensionDetails\":[{\n\t\t\"dimName\":\"event_user\",\n\t\t\"orgId\":0\n\t},{\n\t\t\"dimName\":\"event_zone_till\",\n\t\t\"orgId\":0\n\t}],\n\t\"name\":\"templatetotaltaxn\",\n\t\"description\":\"total transaction\",\n\t\"templateType\":\"KPI\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/template",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTemplateByTemplateId",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/template/{templateId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"template",
+						"{templateId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAllTemplatesByOrgId",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/template",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getPartitionByTemplateId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/partition/{templateId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"partition",
+						"{templateId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getDimensionByTemplateId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/{templateId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"{templateId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getKpisByTemplateId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/kpis/{templateId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"kpis",
+						"{templateId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createJob",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \n   \"name\":\"3 october asaesdscas\",\n   \"description\":\"demo\",\n   \"ftpTag\":\"FTP\",\n   \"cronDetails\":{  \n      \"scheduleType\":\"ONE_TIME\",\n      \"scheduleValue\":1565256524437,\n      \"startValidity\":1565245800000,\n      \"endValidity\":1565245800000,\n      \"dataToSelect\":\"ONE_TIME\",\n      \"dataPeriod\":{  \n         \"startDate\":\"2019-08-01\",\n         \"endDate\":\"2019-08-07\"\n      }\n   },\n   \"source\":\"DATA_EXPORT\",\n   \"jobDetails\":[  \n      {  \n         \"templateId\":151,\n         \"templateName\":\"Payment mode \",\n         \"customersGroupId\":0,\n         \"customersGroupName\":\"\",\n         \"jobMeasureDetails\":[  \n            {  \n               \"measureName\":\"bill_amount\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Bill_Amount\"\n            },\n            {  \n               \"measureName\":\"bill_discount\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Bill_Discount\"\n            },\n            {  \n               \"measureName\":\"bill_number\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Bill_Number\"\n            },\n            {  \n               \"measureName\":\"central_gst\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Central_Gst\"\n            },\n            {  \n               \"measureName\":\"dim_ship_country_id\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Dim_Ship_Country_Id\"\n            },\n            {  \n               \"measureName\":\"gross_weight\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Gross_Weight\"\n            },\n            {  \n               \"measureName\":\"integrated_gst\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Integrated_Gst\"\n            },\n            {  \n               \"measureName\":\"metal_purity\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Metal_Purity\"\n            },\n            {  \n               \"measureName\":\"payment_mode_amount\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Payment_Mode_Amount\"\n            },\n            {  \n               \"measureName\":\"quantity\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Quantity\"\n            },\n            {  \n               \"measureName\":\"ship_address_line1\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Address_Line1\"\n            },\n            {  \n               \"measureName\":\"ship_address_line2\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Address_Line2\"\n            },\n            {  \n               \"measureName\":\"ship_city\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_City\"\n            },\n            {  \n               \"measureName\":\"ship_email\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Email\"\n            },\n            {  \n               \"measureName\":\"ship_first_name\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_First_Name\"\n            },\n            {  \n               \"measureName\":\"ship_last_name\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Last_Name\"\n            },\n            {  \n               \"measureName\":\"ship_phone\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Phone\"\n            },\n            {  \n               \"measureName\":\"ship_state\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_State\"\n            },\n            {  \n               \"measureName\":\"ship_zip\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Ship_Zip\"\n            },\n            {  \n               \"measureName\":\"state_gst\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"State_Gst\"\n            },\n            {  \n               \"measureName\":\"tax_amount\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Tax_Amount\"\n            },\n            {  \n               \"measureName\":\"bill_id\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Bill_Id\"\n            },\n            {  \n               \"measureName\":\"payment_mode_details_id\",\n               \"factName\":\"payment_details_fact\",\n               \"aliasName\":\"Payment_Mode_Details_Id\"\n            }\n         ],\n         \"jobDimensionDetails\":[  \n            {  \n               \"orgId\":50146,\n               \"dimName\":\"bill_outlier_status\",\n               \"attributeName\":\"status\",\n               \"aliasName\":\"Bill_Outlier__Outlier_Status\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_date\",\n               \"attributeName\":\"date\",\n               \"aliasName\":\"Date__date\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_time\",\n               \"attributeName\":\"time\",\n               \"aliasName\":\"Time__time\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"user_id\",\n               \"aliasName\":\"User__user_id\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"slab_name\",\n               \"aliasName\":\"User__slab_name\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"fraud_status\",\n               \"aliasName\":\"User__fraud_status\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"mobile\",\n               \"aliasName\":\"User__mobile\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"loyalty_type\",\n               \"aliasName\":\"User__loyalty_type\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"email\",\n               \"aliasName\":\"User__email\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"last_name\",\n               \"aliasName\":\"User__last_name\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_user\",\n               \"attributeName\":\"first_name\",\n               \"aliasName\":\"User__first_name\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"event_zone_till\",\n               \"attributeName\":\"store_name\",\n               \"aliasName\":\"Store_Hierarchy__Store_Name\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"concept_zone_till\",\n               \"attributeName\":\"concept_name\",\n               \"aliasName\":\"Concept_Hierarchy__concept_name\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"loyalty_type\",\n               \"attributeName\":\"type\",\n               \"aliasName\":\"Loyalty__Loyalty_Type\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"repeat_status\",\n               \"attributeName\":\"status\",\n               \"aliasName\":\"Repeat__Repeat_Status\"\n            },\n            {  \n               \"orgId\":50146,\n               \"dimName\":\"source_type\",\n               \"attributeName\":\"type\",\n               \"aliasName\":\"Source__Source_Type\"\n            }\n         ],\n         \"aliases\":[  \n            \"Bill_Outlier__Outlier_Status\",\n            \"Date__date\",\n            \"Time__time\",\n            \"User__user_id\",\n            \"User__slab_name\",\n            \"User__fraud_status\",\n            \"User__mobile\",\n            \"User__loyalty_type\",\n            \"User__email\",\n            \"User__last_name\",\n            \"User__first_name\",\n            \"Store_Hierarchy__Store_Name\",\n            \"Concept_Hierarchy__concept_name\",\n            \"Loyalty__Loyalty_Type\",\n            \"Repeat__Repeat_Status\",\n            \"Source__Source_Type\",\n            \"Bill_Amount\",\n            \"Bill_Discount\",\n            \"Bill_Number\",\n            \"Central_Gst\",\n            \"Dim_Ship_Country_Id\",\n            \"Gross_Weight\",\n            \"Integrated_Gst\",\n            \"Metal_Purity\",\n            \"Payment_Mode_Amount\",\n            \"Quantity\",\n            \"Ship_Address_Line1\",\n            \"Ship_Address_Line2\",\n            \"Ship_City\",\n            \"Ship_Email\",\n            \"Ship_First_Name\",\n            \"Ship_Last_Name\",\n            \"Ship_Phone\",\n            \"Ship_State\",\n            \"Ship_Zip\",\n            \"State_Gst\",\n            \"Tax_Amount\",\n            \"Bill_Id\",\n            \"Payment_Mode_Details_Id\"\n         ]\n      }\n   ],\n   \"recipients\":[  \n      \"kmehra@capillary.co.in\"\n   ],\n   \"dumpType\":\"FTP\",\n   \"createdBy\":\"15000449\",\n   \"lastUpdatedBy\":\"15000449\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/job",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rerun",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-JOB-GROUP-ID",
+						"value": "9",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/rerun/{jobGroupId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"rerun",
+						"{jobGroupId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAllJobsByOrgId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://nightly.capillary.in/reonexport/v1/orgs/50146/job",
+					"protocol": "https",
+					"host": [
+						"nightly",
+						"capillary",
+						"in"
+					],
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJobDetailsByJobGroupId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://nightly.capillary.in/reonexport/v1/orgs/50146/jobs/{jobGroupId}",
+					"protocol": "https",
+					"host": [
+						"nightly",
+						"capillary",
+						"in"
+					],
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"jobs",
+						"{jobGroupId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTemplateIdsByJobGroupId",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/jobs/{jobGroupId}/{templateId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"jobs",
+						"{jobGroupId}",
+						"{templateId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getCronByJobGroupId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/cron/{jobGroupId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"cron",
+						"{jobGroupId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getExecutionDetailsByJobGroupId",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/executions/{job_group_id}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"executions",
+						"{job_group_id}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateExportScheduleDetails",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "15000448"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cronBody\": {\n\t\"jobGroupId\": \"2353\",\n\t\"scheduleType\": \"DAILY\",\n\t\"scheduleValue\":\"2019-10-27\",\n\t\"dataToSelect\":\"ONE_TIME\",\n\t\"dataPeriod\":{\"startDate\" : \"2019-10-20\", \"endDate\" : \"2019-10-23\"},\n\t\"startValidity\" : \"\",\n\t\"endValidity\" : \"\",\n    \"isActive\":\"true\"\n  },\n  \"jobGroupDetailBody\": {\n    \"id\": \"2353\",\n    \"name\": \"demo testing\",\n    \"description\": \"dem9dcdc424234234\",\n    \"dumpType\": \"FTP\",\n    \"recipients\": [\n      \"ashish@capillary.co.in\",\n      \"rohit.srivastava.co.in\"\n    ],\n    \"lastUpdatedBy\": \"15000949\",\n    \"lastUpdatedOn\": \"\"\n  }\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/updateSchedule",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"updateSchedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateCronByJobGroupId",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jobGroupId\": \"\",\n    \"scheduleType\": \"DAILY\",\n    \"scheduleValue\":\"2019-10-27\",\n    \"dataToSelect\":\"ONE_TIME\",\n    \"dataPeriod\":{\"startDate\" : \"2019-10-20\", \"endDate\" : \"2019-10-23\"},\n    \"startValidity\" : \"\",\n    \"endValidity\" : \"\",\n    \"isActive\":\"true\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/cron/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"cron",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateJobGroupDetails",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "15000448"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \n\t\"id\": \"\",\n\t\"name\": \"demo testing\",\n\t\"description\": \"dem9dcdc42\",\n\t\"dumpType\": \"FTP\",\n\t\"recipients\": [\n\t  \"ashish@capillary.co.in\",\n\t  \"rohit@capillary.co.in\"\n\t],\n\t\"lastUpdatedBy\": \"15000948\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/jobgroup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"jobgroup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getQueryDetails",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/date/{run_date}/query/{job_group_id}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"date",
+						"{run_date}",
+						"query",
+						"{job_group_id}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userexists",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "0",
+						"disabled": true
+					},
+					{
+						"key": "X-CAP-SERVICE-AUTH-KEY",
+						"value": "YyXP5Zmbo6MdA+sWXtDv6zQ+uF6QR1F7oR/4tc87fnP9WIcZbuL1+aJln32O/LfPpiIITGeDn+ukhu02UAVvITp1EkNcuc8bg8jSQUA/yuM=",
+						"type": "text"
+					},
+					{
+						"key": "X-CAP-REMOTE-USER",
+						"value": "ZION_USER"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"url": {
+					"raw": "https://nightly.capillary.in/arya/api/v1/auth/userexists",
+					"protocol": "https",
+					"host": [
+						"nightly",
+						"capillary",
+						"in"
+					],
+					"path": [
+						"arya",
+						"api",
+						"v1",
+						"auth",
+						"userexists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "maskingPermissions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "0",
+						"disabled": true
+					},
+					{
+						"key": "X-CAP-SERVICE-AUTH-KEY",
+						"value": "YyXP5Zmbo6MdA+sWXtDv6zQ+uF6QR1F7oR/4tc87fnP9WIcZbuL1+aJln32O/LfPpiIITGeDn+ukhu02UAVvITp1EkNcuc8bg8jSQUA/yuM=",
+						"type": "text"
+					},
+					{
+						"key": "X-CAP-REMOTE-USER",
+						"value": "ZION_USER"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"url": {
+					"raw": "https://nightly.capillary.in/arya/api/v1/auth/userexists",
+					"protocol": "https",
+					"host": [
+						"nightly",
+						"capillary",
+						"in"
+					],
+					"path": [
+						"arya",
+						"api",
+						"v1",
+						"auth",
+						"userexists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getQueryDetailsForRerun",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/date/{run_date}/query/{job_group_id}/rerun",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"date",
+						"{run_date}",
+						"query",
+						"{job_group_id}",
+						"rerun"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "scheduledJobs",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/date/{run_date}/schedules",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"date",
+						"{run_date}",
+						"schedules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "triggerJobExecution",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"jobGroupId\" : \"2032\",\n\t\"jobId\" : \"142\",\n\t\"templateId\" : \"151\",\n\t\"templateName\" : \"stores\",\n\t\"executionId\" : \"234567432\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/triggerrun",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"triggerrun"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkFtpCredential",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"host\":\"data.capillarydata.com:22\",\n\t\"userName\":\"noc.test\",\n\t\"password\":\"!Noctesting123\",\n\t\"defaultFolder\":\"/NOC/ABC\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/checkFtp",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"checkFtp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJobCount",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://nightly.capillary.in/reonexport/v1/orgs/50146/job/count",
+					"protocol": "http",
+					"host": [
+						"nightly",
+						"capillary",
+						"in"
+					],
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"job",
+						"count"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getFtpFolderPath",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "X-CAP-API-AUTH-FTP-TAG",
+						"value": "FTPTAG9",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/ftp/path/{ftp_tag}/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"ftp",
+						"path",
+						"{ftp_tag}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateCronByJobGroupId Copy",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-CAP-API-AUTH-ORG-ID",
+						"value": "50146"
+					},
+					{
+						"key": "X-CAP-API-AUTH-USER-ID",
+						"value": "11"
+					},
+					{
+						"key": "X-CAP-API-AUTH-MODULE",
+						"value": "export"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jobGroupId\": \"\",\n    \"scheduleType\": \"DAILY\",\n    \"scheduleValue\":\"2019-10-27\",\n    \"dataToSelect\":\"ONE_TIME\",\n    \"dataPeriod\":{\"startDate\" : \"2019-10-20\", \"endDate\" : \"2019-10-23\"},\n    \"startValidity\" : \"\",\n    \"endValidity\" : \"\",\n    \"isActive\":\"true\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:1420/reonexport/v1/orgs/50146/cron/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1420",
+					"path": [
+						"reonexport",
+						"v1",
+						"orgs",
+						"50146",
+						"cron",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
