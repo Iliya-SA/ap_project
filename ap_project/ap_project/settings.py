@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'routine',
     'rest_framework',
     'rest_framework.authtoken',
+    'recommendation',
 ]
 
 MIDDLEWARE = [
