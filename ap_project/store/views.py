@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render , redirect
 from products.models import Product, Favorite
 from orders.models import Order
 from django.http import JsonResponse
@@ -7,6 +7,9 @@ from django.db.models.functions import Coalesce, Ln
 from django.contrib.auth.decorators import login_required
 from .models import SearchHistory
 from context.views import get_persian_season
+from django.contrib.auth.decorators import login_required
+from recommendation.views import top_recommendations
+from rest_framework.test import APIRequestFactory
 
 
 WORD_MAPPING = {
@@ -209,3 +212,33 @@ def seasonal_products_view(request):
         'products': products,
         'season': season
     })
+@login_required
+def quiz_page(request):
+    if request.method == "POST":
+        skin_type = request.POST.get("skin_type")
+        concerns = request.POST.getlist("concerns")  # لیست
+        preferences = request.POST.getlist("preferences")
+
+        factory = APIRequestFactory()
+        drf_request = factory.post(
+            "/api/recommendations/",
+            {"skin_type": skin_type, "concerns": concerns, "preferences": preferences},
+            format="json"
+        )
+        drf_request.user = request.user
+
+        response = top_recommendations(drf_request)
+
+        # ✅ بررسی محتوا
+        data = response.data
+        if "error" in data:
+            return render(request, "store/quiz_result.html", {
+                "error": data["error"],
+                "recommendations": []
+            })
+
+        return render(request, "store/quiz_result.html", {
+            "recommendations": data.get("recommendations", [])
+        })
+
+    return render(request, "store/quiz_page.html")

@@ -1,0 +1,17 @@
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<h3>نتیجه روتین شما</h3>
+<ul>
+    {% for product in recommendations %}
+        <li>
+            <img src="{{ product.image_url }}" width="80">
+            <strong>{{ product.name }}</strong> - {{ product.brand }} <br>
+            {{ product.price }} تومان <br>
+            <em>{{ product.reason }}</em>
+        </li>
+    {% empty %}
+        <p>محصولی یافت نشد.</p>
+    {% endfor %}
+</ul>
