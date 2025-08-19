@@ -1,0 +1,45 @@
+{% extends "store/base.html" %}
+{% block title %}کوییز روتین پوستی{% endblock %}
+
+{% block content %}
+<div class="card p-4">
+    <h4>کوییز روتین پوستی</h4>
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label">نوع پوست</label>
+            <select class="form-select" name="skin_type" required>
+                <option value="">انتخاب کنید</option>
+                <option value="oily">چرب</option>
+                <option value="dry">خشک</option>
+                <option value="normal">معمولی</option>
+                <option value="combination">ترکیبی</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">مهم‌ترین دغدغه پوستی شما</label>
+            <select class="form-select" name="concern" required>
+                <option value="">انتخاب کنید</option>
+                <option value="acne">جوش</option>
+                <option value="wrinkles">چروک</option>
+                <option value="dark_spots">لک</option>
+                <option value="sensitive">حساسیت</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">بودجه تقریبی</label>
+            <select class="form-select" name="budget" required>
+                <option value="">انتخاب کنید</option>
+                <option value="low">کم (زیر ۵۰۰ هزار)</option>
+                <option value="medium">متوسط (۵۰۰ تا ۱.۵ میلیون)</option>
+                <option value="high">بالا (بیشتر از ۱.۵ میلیون)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">مشاهده روتین پیشنهادی</button>
+    </form>
+</div>
+{% endblock %}

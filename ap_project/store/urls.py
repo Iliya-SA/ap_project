@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import store_view, search_history_view, contact_feedback_view, favorites_list_view, seasonal_products_view
+from .views import (
+    store_view, search_history_view, contact_feedback_view,
+    favorites_list_view, seasonal_products_view, quiz_page
+)
 from . import views
 
 urlpatterns = [
@@ -11,4 +14,5 @@ urlpatterns = [
     path('history/', search_history_view, name='search_history'),
     path('favorites/', favorites_list_view, name='favorites-list'),
     path('seasonal-products/', seasonal_products_view, name='seasonal-products'),
+    path("routine/quiz/", quiz_page, name="quiz_page"),
 ]

@@ -32,65 +32,60 @@ def _map_skin(skin_type):
 def pick_product(category=None, skin_fa=None, preferences=None, concern=None):
     qs = Product.objects.all()
 
+    # 🔹 فیلتر بر اساس دسته‌بندی
     if category:
         qs = qs.filter(category=category)
+
+    # 🔹 فیلتر بر اساس نوع پوست
     if skin_fa:
         qs = qs.filter(skin_type=skin_fa)
 
     preferences = preferences or []
 
-    # preference example: fragrance_free
+    # 🔹 فیلتر بر اساس ترجیحات
     if "fragrance_free" in preferences:
         qs = qs.filter(
-            Q(tags__contains=["fragrance_free"]) |
-            Q(description__icontains="بدون عطر") |
-            Q(description__icontains="fragrance")
+            Q(tags__icontains="fragrance_free") |
+            Q(tags__icontains="بدون عطر") |
+            Q(description__icontains="بدون عطر")
         )
 
-    # If picking for a specific concern step (treatment)
+    # 🔹 فیلتر بر اساس نگرانی
     if concern:
-        # try matching by category first
         cat = CONCERN_TO_CATEGORY.get(concern)
         if cat:
             qs = qs.filter(category=cat)
         else:
-            # fallback by concern keyword in description/concerns_targeted
             qs = qs.filter(
                 Q(concerns_targeted__icontains=concern) |
                 Q(description__icontains=concern)
             )
 
-    # Prefer in-stock and newer products
+    # 🔹 فقط محصولات موجود
     qs = qs.filter(stock__gt=0).order_by("-created_at")
+    return qs.first()
 
-    return qs.first()  # None if no match
-
-def select_products_from_quiz(skin_type, concerns, preferences):
-    """
-    Returns:
-    steps: list[ (step_name, product) ]
-    plan_name: str
-    """
+def select_products_from_quiz(skin_type, concerns, preferences, plan_type=None):
     skin_fa = _map_skin(skin_type)
     concerns = concerns or []
     preferences = preferences or []
 
     steps = []
 
-    # 1) Base steps: moisturizer + sunscreen
+    # مراحل پایه
     for step_name, category in BASE_STEPS:
         prod = pick_product(category=category, skin_fa=skin_fa, preferences=preferences)
         if prod:
             steps.append((step_name, prod))
 
-    # 2) Targeted treatment for the TOP concern (first one user selected)
+    # درمان هدفمند فقط برای Full و Hydration
     main_concern = concerns[0] if concerns else None
-    if main_concern:
+    if main_concern and plan_type in ["Full Plan", "Hydration Plan"]:
         treatment = pick_product(skin_fa=skin_fa, preferences=preferences, concern=main_concern)
         if treatment:
             steps.append(("Targeted Treatment", treatment))
 
-    # Decide plan_name
+    # تعیین نام پلن
     if main_concern and len(steps) >= 3:
         plan_name = "Full Plan"
     elif not main_concern and any(s[0] == "Moisturizer" for s in steps):
