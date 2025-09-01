@@ -43,16 +43,13 @@ class UserEditForm(forms.ModelForm):
     ('حساس', 'حساس'),
 ]
     skin_type = forms.ChoiceField(choices=SKIN_TYPE_CHOICES, required=False)
-    concerns = forms.CharField(required=False, widget=forms.Textarea)
-    references = forms.CharField(required=False, widget=forms.Textarea)
-    preferences = forms.CharField(required=False, widget=forms.Textarea)
     device_type = forms.CharField(required=False)
 
     class Meta:
         model = User
         fields = [
             'username', 'first_name', 'last_name', 'email',
-            'skin_type', 'concerns', 'references', 'preferences', 'device_type',
+                'skin_type', 'device_type',
         ]
         widgets = {
             'username': forms.TextInput(attrs={'placeholder': 'نام کاربری'}),
@@ -60,9 +57,7 @@ class UserEditForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'placeholder': 'نام خانوادگی'}),
             'email': forms.EmailInput(attrs={'placeholder': 'ایمیل'}),
             'skin_type': forms.TextInput(attrs={'placeholder': 'نوع پوست'}),
-            'concerns': forms.Textarea(attrs={'placeholder': 'مشکلات پوستی'}),
-            'references': forms.Textarea(attrs={'placeholder': 'منابع'}),
-            'preferences': forms.Textarea(attrs={'placeholder': 'ترجیحات'}),
+
             'device_type': forms.TextInput(attrs={'placeholder': 'نوع دستگاه'}),
         }
 
@@ -73,9 +68,6 @@ class UserEditForm(forms.ModelForm):
             try:
                 profile = user.profile
                 self.fields['skin_type'].initial = profile.skin_type
-                self.fields['concerns'].initial = profile.concerns
-                self.fields['references'].initial = profile.references
-                self.fields['preferences'].initial = profile.preferences
                 self.fields['device_type'].initial = profile.device_type
             except Profile.DoesNotExist:
                 pass
@@ -88,9 +80,6 @@ class UserEditForm(forms.ModelForm):
 
         profile_data = {
             'skin_type': self.cleaned_data.get('skin_type', ''),
-            'concerns': self.cleaned_data.get('concerns', ''),
-            'references': self.cleaned_data.get('references', ''),
-            'preferences': self.cleaned_data.get('preferences', ''),
             'device_type': self.cleaned_data.get('device_type', ''),
         }
 

@@ -20,7 +20,6 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('skin_type', models.CharField(blank=True, max_length=50)),
                 ('concerns', models.TextField(blank=True)),
-                ('references', models.TextField(blank=True)),
                 ('preferences', models.JSONField(blank=True, default=dict)),
                 ('device_type', models.CharField(blank=True, max_length=50)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),

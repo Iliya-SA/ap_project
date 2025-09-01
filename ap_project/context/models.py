@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from accounts.models import Profile
+from products.models import Product
 
 class ContextData(models.Model):
     DEVICE_CHOICES = [
@@ -21,3 +23,10 @@ class ContextData(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.device_type} - {self.season} - {self.timestamp}"
+# context/models.py
+# context/models.py
+class UserContext(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    device_type = models.CharField(max_length=20, blank=True)  # mobile, desktop
+    season = models.CharField(max_length=10, blank=True)  # summer, winter
+    timestamp = models.DateTimeField(auto_now_add=True)

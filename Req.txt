@@ -1,0 +1,10 @@
+"token": "fb76af5e377f3171a72fe146395ea0cb7cabde16"
+
+
+
+body -> raw -> json ->:
+{
+  "skin_type": "oily",
+  "concerns": ["acne"],
+  "preferences": ["fragrance_free"]
+}
