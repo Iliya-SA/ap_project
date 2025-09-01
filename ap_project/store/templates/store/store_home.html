@@ -30,7 +30,7 @@
 </section>
 
 <section class="mt-4">
-    <h5>محصولات پیشنهادی برای نوع پوست شما {% if user.profile.skin_type %}({{ user.profile.skin_type }}){% endif %}</h5>
+    <h5>محصولات پیشنهادی برای پوست شما {% if user.profile.skin_type %}({{ user.profile.skin_type }}){% endif %}</h5>
     <div class="row">
         {% for product in recommended_products %}
         <div class="col-md-3 col-sm-6">

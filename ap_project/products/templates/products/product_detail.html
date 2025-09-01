@@ -131,14 +131,29 @@
     <!-- نوار بالا با علاقه‌مندی -->
     <nav class="top-navbar">
         <a href="{% url 'store' %}">← بازگشت به صفحه اصلی</a>
-        <a href="{% url 'toggle-favorite' product.pk %}" class="favorite-link">
-            {% if is_favorite %}
-                <span class="heart">❤️</span>
-            {% else %}
-                <span class="heart">🤍</span>
-            {% endif %}
+        <a href="#" id="favorite-btn" class="favorite-link" data-url="{% url 'toggle-favorite' product.pk %}">
+            <span class="heart">{% if is_favorite %}❤️{% else %}🤍{% endif %}</span>
             علاقه‌مندی
         </a>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var favBtn = document.getElementById('favorite-btn');
+            favBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch(favBtn.getAttribute('data-url'), {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    favBtn.querySelector('.heart').textContent = data.is_favorite ? '❤️' : '🤍';
+                });
+            });
+        });
+        </script>
     </nav>
 
     <!-- بخش محصول -->
@@ -158,7 +173,7 @@
                 <h5 class="text-muted">{{ product.brand }}</h5>
                 <p><strong>دسته‌بندی:</strong> {{ product.category }}</p>
                 <p>{{ product.description }}</p>
-                <p><strong>مناسب برای پوست‌های:</strong> {{ product.skin_type }}</p>
+                <p><strong>مناسب برای پوست‌های:</strong> {{ skin_type_str }}</p>
 
                 <div class="my-3 fs-5">
                     <span class="star-icon">★</span>

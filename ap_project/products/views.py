@@ -1,5 +1,5 @@
 from django.views.generic import DetailView
-from .models import Product, Comment, Favorite
+from .models import Product, Comment
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +7,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
 class ProductDetailView(DetailView):
@@ -40,9 +42,13 @@ class ProductDetailView(DetailView):
 
         # وضعیت علاقه‌مندی محصول برای کاربر فعلی
         if user.is_authenticated:
-            context['is_favorite'] = Favorite.objects.filter(user=user, product=product).exists()
+                profile = getattr(user, 'profile', None)
+                context['is_favorite'] = profile.favorites.filter(id=product.id).exists() if profile else False
         else:
             context['is_favorite'] = False
+
+        skin_type_str = str(product.skin_type).replace('[','').replace(']','').replace("'", "")
+        context['skin_type_str'] = skin_type_str
 
         return context
 
@@ -77,13 +83,22 @@ class AddCommentView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('product-detail', kwargs={'pk': self.kwargs['pk']})
 
+
 @login_required
+@require_POST
 def toggle_favorite(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
-
-    if not created:
-        favorite.delete()  # اگه قبلاً بود حذفش کن
+    profile = getattr(request.user, 'profile', None)
+    is_favorite = False
+    if profile:
+        if profile.favorites.filter(id=product.id).exists():
+            profile.favorites.remove(product)
+            is_favorite = False
+        else:
+            profile.favorites.add(product)
+            is_favorite = True
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'is_favorite': is_favorite})
     return redirect(request.META.get('HTTP_REFERER', 'store'))
 
 

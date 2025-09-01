@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    store_view, search_history_view, contact_feedback_view,
+    store_view, visited_items_view, contact_feedback_view,
     favorites_list_view, seasonal_products_view, quiz_page
 )
 from . import views
@@ -11,8 +11,8 @@ urlpatterns = [
     path('category/<str:name>/', views.category_view, name='category'),
     path('contact-feedback/', contact_feedback_view, name='contact_feedback'),  
     path('autocomplete/', views.autocomplete_search, name='autocomplete_search'),
-    path('history/', search_history_view, name='search_history'),
     path('favorites/', favorites_list_view, name='favorites-list'),
     path('seasonal-products/', seasonal_products_view, name='seasonal-products'),
+    path('visited-items/', visited_items_view, name='visited-items'),
     path("routine/quiz/", quiz_page, name="quiz_page"),
 ]

@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'routine',
     'rest_framework',
     'rest_framework.authtoken',
-    'recommendation',
 ]
 
 MIDDLEWARE = [
@@ -98,7 +97,8 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# آدرس لاگین را اصلاح کن
+LOGIN_URL = '/accounts/signin/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

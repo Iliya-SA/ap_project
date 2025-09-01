@@ -1,14 +1,13 @@
 from django.shortcuts import render , redirect
-from products.models import Product, Favorite
+from django.utils import timezone
+from products.models import Product
 from orders.models import Order
 from django.http import JsonResponse
 from django.db.models import Count, Avg, F, FloatField, ExpressionWrapper, Func, Q
 from django.db.models.functions import Coalesce, Ln
 from django.contrib.auth.decorators import login_required
-from .models import SearchHistory
 from context.views import get_persian_season
 from django.contrib.auth.decorators import login_required
-from recommendation.views import top_recommendations
 from rest_framework.test import APIRequestFactory
 
 
@@ -75,7 +74,18 @@ def store_view(request):
             })
 
         if request.user.is_authenticated:
-            SearchHistory.objects.create(user=request.user, query=query)
+            profile = getattr(request.user, 'profile', None)
+            if profile is not None:
+                visited = profile.visited_items or []
+                # اگر query یک محصول باشد، باید product_id و زمان را ذخیره کنیم
+                product_id = None
+                if search_results.exists():
+                    product_id = search_results.first().id
+                visit_time = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
+                if product_id:
+                    visited.append({"product_id": product_id, "visit_time": visit_time})
+                profile.visited_items = visited[-100:]
+                profile.save()
 
         return render(request, 'store/search_results.html', {
             'query': query,
@@ -100,14 +110,13 @@ def store_view(request):
             ).order_by('-avg_rating')[:10]
 
     # محصولات مورد علاقه: دو بخش جدا
-    liked_favorites = []
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        liked_favorites = list(request.user.profile.favorites.all())
+    else:
+        liked_favorites = []
     recent_purchases = []
 
     if request.user.is_authenticated:
-        # 5 محصول که کاربر لایک کرده
-        liked_favorites_qs = Favorite.objects.filter(user=request.user).select_related('product').order_by('-created_at')[:5]
-        liked_favorites = [fav.product for fav in liked_favorites_qs]
-
         # 5 محصول آخرین خریدهای کاربر
         user_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
         purchased_products = []
@@ -188,13 +197,14 @@ def autocomplete_search(request):
     return JsonResponse(results, safe=False)
 
 @login_required
-def search_history_view(request):
-    history = SearchHistory.objects.filter(user=request.user).order_by('-timestamp')[:20]
-    return render(request, 'store/search_history.html', {'history': history})
+def visited_items_view(request):
+    profile = getattr(request.user, 'profile', None)
+    visited = profile.visited_items if profile else []
+    return render(request, 'store/visited_items.html', {'visited_items': visited[::-1][:20]})
 
 @login_required
 def favorites_list_view(request):
-    favorite_product_ids = request.user.favorites.values_list('product_id', flat=True)
+    favorite_product_ids = request.user.profile.favorites.values_list('id', flat=True)
     products = Product.objects.filter(id__in=favorite_product_ids).annotate(
         avg_rating=Coalesce(Avg('comments__rating'), 0.0),
         comment_count=Coalesce(Count('comments'), 0)
@@ -227,18 +237,8 @@ def quiz_page(request):
         )
         drf_request.user = request.user
 
-        response = top_recommendations(drf_request)
-
-        # ✅ بررسی محتوا
-        data = response.data
-        if "error" in data:
-            return render(request, "store/quiz_result.html", {
-                "error": data["error"],
-                "recommendations": []
-            })
-
         return render(request, "store/quiz_result.html", {
-            "recommendations": data.get("recommendations", [])
+            "recommendations": []
         })
 
     return render(request, "store/quiz_page.html")

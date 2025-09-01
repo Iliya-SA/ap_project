@@ -18,6 +18,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)  # قیمت هر محصول در زمان سفارش
+    date = models.DateTimeField(auto_now_add=True)  # زمان خرید هر آیتم
 
     def total_price(self):
         return self.quantity * self.price

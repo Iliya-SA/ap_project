@@ -18,12 +18,10 @@ def quiz_view(request):
 
     skin_type = data.get('skin_type')
     concerns = data.get('concerns', [])
-    preferences = data.get('preferences', [])
 
     profile, _ = Profile.objects.get_or_create(user=user)
     profile.skin_type = skin_type  # ✅ ذخیره skin_type
     profile.concerns = concerns
-    profile.preferences = preferences
     profile.save()
 
     # حذف روتین‌های قبلی
@@ -42,7 +40,6 @@ def quiz_view(request):
         steps, _ = select_products_from_quiz(
             skin_type=skin_type,
             concerns=concerns,
-            preferences=preferences,
             plan_type=plan_config["name"]  # می‌تونیم بر اساس نوع پلن رفتار کنیم
         )
 

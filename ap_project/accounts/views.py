@@ -64,18 +64,12 @@ def edit_profile_view(request):
                 form.save()
                 # آپدیت پروفایل
                 profile.skin_type = form.cleaned_data.get('skin_type', '')
-                profile.concerns = form.cleaned_data.get('concerns', '')
-                profile.references = form.cleaned_data.get('references', '')
-                profile.preferences = form.cleaned_data.get('preferences', '')
                 profile.device_type = form.cleaned_data.get('device_type', '')
                 profile.save()
             return redirect('profile')
     else:
         initial = {
             'skin_type': profile.skin_type,
-            'concerns': profile.concerns,
-            'references': profile.references,
-            'preferences': profile.preferences,
             'device_type': profile.device_type,
         }
         form = UserEditForm(instance=user, initial=initial)

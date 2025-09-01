@@ -26,10 +26,14 @@ class Product(models.Model):
     skin_type = models.CharField(max_length=50, choices=SKIN_TYPE_CHOICES)
     concerns_targeted = models.CharField(max_length=200)
     tags = models.JSONField(default=list)
+    suitable_for = models.JSONField(blank=True, null=True, default=list)
     price = models.IntegerField()
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='product_images/', default='product_images/default.jpg')
     created_at = models.DateTimeField(auto_now_add=True)
+    products_tokens = models.JSONField(blank=True, null=True, default=dict)
+    similar_products = models.JSONField(blank=True, null=True, default=list)
+    similarity_threshold = models.FloatField(blank=True, null=True, default=0.0)
 
     def average_rating(self):
         result = self.comments.aggregate(avg_rating=Avg('rating'))
@@ -50,13 +54,3 @@ class Comment(models.Model):
         return f"{self.user} - {self.product.name} ({self.rating})"
 
 
-class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'product')  # جلوگیری از تکرار علاقه‌مندی
-
-    def __str__(self):
-        return f"{self.user.username} ❤️ {self.product.name}"

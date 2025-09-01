@@ -1,0 +1,14 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+  <h2>محصولات بازدیدشده</h2>
+  <ul>
+  {% for item in visited_items|slice:":-1" %}
+      <li>
+        محصول: {{ item.product_id }} | زمان بازدید: {{ item.visit_time }}
+      </li>
+    {% empty %}
+      <li>هیچ محصولی بازدید نشده است.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
