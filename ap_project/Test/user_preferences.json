@@ -1,0 +1,32 @@
+{
+    "skin_type": "خشک",
+    "main_concern": [
+        "آکنه و جوش",
+        "خشکی"
+    ],
+    "product_type": "مرطوب‌کننده",
+    "features": [
+        "مات‌کننده",
+        "حاوی ویتامین C",
+        "بدون عطری"
+    ],
+    "budget": {
+        "min": 200000,
+        "max": 400000
+    },
+    "brand_preference": "برند مهم نیست",
+    "texture": "کرم",
+    "paraben_free": "مهم",
+    "alcohol_free": "فعلاً مهم نیست",
+    "fragrance_free": "مهم",
+    "absorption": "جذب سریع",
+    "active_ingredients": [
+        "هیالورونیک اسید",
+        "ویتامین C",
+        "نیکوتین‌آمید"
+    ],
+    "forbidden_ingredients": "پارابن و سولفات و الکل نباشد",
+    "current_products": "مرطوب‌کننده آردن و ژل شست‌وشوی نوتروژینا",
+    "wishlist_feature": "محصول سبک با جذب سریع و بوی ملایم",
+    "other_notes": "ترجیح می‌دهم محصول گیاهی باشد"
+}

@@ -1,0 +1,146 @@
+[
+  {
+    "user": "u1",
+    "productId": 54,
+    "date": "2025-07-18T04:24:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 54,
+    "date": "2025-07-15T12:12:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 54,
+    "date": "2025-02-25T21:26:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 2,
+    "date": "2025-04-04T07:49:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 2,
+    "date": "2025-07-25T17:13:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 39,
+    "date": "2025-01-29T13:39:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 48,
+    "date": "2025-06-06T23:27:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 48,
+    "date": "2025-03-08T00:33:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 25,
+    "date": "2025-01-03T02:04:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 35,
+    "date": "2025-07-17T14:53:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 35,
+    "date": "2025-03-17T10:53:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 35,
+    "date": "2025-01-17T02:23:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 73,
+    "date": "2025-05-27T16:26:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 73,
+    "date": "2025-04-01T01:01:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 73,
+    "date": "2025-02-01T13:08:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 56,
+    "date": "2025-08-01T08:46:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 21,
+    "date": "2025-03-13T18:43:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 21,
+    "date": "2025-04-03T10:26:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 21,
+    "date": "2025-01-09T19:57:59",
+    "quantity": 3
+  },
+  {
+    "user": "u1",
+    "productId": 77,
+    "date": "2025-01-22T23:50:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 77,
+    "date": "2025-07-04T12:25:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 16,
+    "date": "2025-05-25T13:59:59",
+    "quantity": 2
+  },
+  {
+    "user": "u1",
+    "productId": 74,
+    "date": "2025-03-02T09:54:59",
+    "quantity": 1
+  },
+  {
+    "user": "u1",
+    "productId": 34,
+    "date": "2025-02-11T23:10:59",
+    "quantity": 2
+  }
+]
