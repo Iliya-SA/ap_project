@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'context',
     'routine',
+    'quiz',
     'rest_framework',
     'rest_framework.authtoken',
 ]

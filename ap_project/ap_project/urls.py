@@ -29,6 +29,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('context/', include('context.urls')),
     path('api/routine/', include('routine.urls')),
+    path('quiz/', include('quiz.urls', namespace='quiz')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
 

@@ -1,17 +1,16 @@
-{% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
+{% extends "store/base.html" %}
+{% block title %}نتیجه کوییز{% endblock %}
 
-<h3>نتیجه روتین شما</h3>
-<ul>
-    {% for product in recommendations %}
-        <li>
-            <img src="{{ product.image_url }}" width="80">
-            <strong>{{ product.name }}</strong> - {{ product.brand }} <br>
-            {{ product.price }} تومان <br>
-            <em>{{ product.reason }}</em>
-        </li>
-    {% empty %}
-        <p>محصولی یافت نشد.</p>
-    {% endfor %}
-</ul>
+{% block content %}
+<div class="card p-4">
+  <h4>نتیجه کوییز</h4>
+
+  {% if saved %}
+    <p class="text-success">✅ خروجی در پروفایل ذخیره شد.</p>
+  {% endif %}
+
+  <pre>Preferences: {{ preferences_output|safe }}</pre>
+  <pre>Keywords: {{ keywords_output|safe }}</pre>
+  <p>Profile ID: {{ profile.pk }}</p>
+</div>
+{% endblock %}

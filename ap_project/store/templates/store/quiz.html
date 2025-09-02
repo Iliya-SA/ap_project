@@ -1,0 +1,67 @@
+{% extends "store/base.html" %}
+{% block title %}کوییز روتین پوستی{% endblock %}
+
+{% block content %}
+<div class="card p-4">
+  <h4>کوییز روتین پوستی</h4>
+  <form method="post" id="quizForm">
+    {% csrf_token %}
+
+    {% for key, question_text, options in readable_questions %}
+      <div class="mb-3">
+        <label class="form-label">{{ question_text }}</label>
+
+        {% if options %}
+          {% if key in multi_keys %}
+            {% for opt in options %}
+              <div class="form-check form-check-reverse">
+                <input class="form-check-input" type="checkbox" name="{{ key }}[]" value="{{ forloop.counter }}" id="{{ key }}_{{ forloop.counter }}">
+                <label class="form-check-label" for="{{ key }}_{{ forloop.counter }}">{{ opt }}</label>
+              </div>
+            {% endfor %}
+          {% else %}
+            <select class="form-select" name="{{ key }}" required>
+              <option value="">انتخاب کنید</option>
+              {% for opt in options %}
+                <option value="{{ forloop.counter }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
+        {% else %}
+          <textarea class="form-control" name="{{ key }}" rows="2"></textarea>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">ارسال</button>
+  </form>
+</div>
+
+<script>
+// تبدیل multi_keys به آرایه JS
+const multiKeys = JSON.parse('{{ multi_keys|escapejs }}');
+
+document.getElementById('quizForm').addEventListener('submit', function(e) {
+    let valid = true;
+    let firstInvalid = null;
+
+    multiKeys.forEach(key => {
+        const checkboxes = document.querySelectorAll(`input[name="${key}[]"]`);
+        if (checkboxes.length > 0) {
+            const checked = Array.from(checkboxes).some(c => c.checked);
+            if (!checked) {
+                valid = false;
+                if (!firstInvalid) firstInvalid = checkboxes[0];
+            }
+        }
+    });
+
+    if (!valid) {
+        alert("لطفاً همه سوالات چندگزینه‌ای را پاسخ دهید!");
+        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        e.preventDefault();
+    }
+});
+</script>
+
+{% endblock %}
