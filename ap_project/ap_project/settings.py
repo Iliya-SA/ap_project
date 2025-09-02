@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'context',
     'routine',
     'quiz',
+    "recommendation",
     'rest_framework',
     'rest_framework.authtoken',
 ]
