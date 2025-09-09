@@ -9,6 +9,9 @@
         <div class="card">
             <div class="card-body">
                 <h3 class="card-title mb-3">ورود</h3>
+                {% if error_message %}
+                    <div class="alert alert-danger">{{ error_message }}</div>
+                {% endif %}
                 <form method="post">
                     {% csrf_token %}
                     {% if request.GET.next %}

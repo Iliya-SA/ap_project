@@ -23,15 +23,18 @@ def signup_view(request):
 
 
 def signin_view(request):
+    error_message = None
     if request.method == 'POST':
         form = SignInForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('home')
+        else:
+            error_message = "نام کاربری یا رمز عبور اشتباه است. لطفاً دوباره تلاش کنید."
     else:
         form = SignInForm()
-    return render(request, 'accounts/signin.html', {'form': form})
+    return render(request, 'accounts/signin.html', {'form': form, 'error_message': error_message})
 
 
 @login_required

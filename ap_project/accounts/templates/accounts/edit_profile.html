@@ -1,37 +1,48 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-    <meta charset="UTF-8" />
-    <title>ویرایش اطلاعات کاربر</title>
-        <style>
-            body {
-                background-color: #87CEEB; /* رنگ آبی آسمانی */
-                color: #000000;
-                font-family: Arial, sans-serif;
-                padding: 20px;
-            }
-            button {
-                background-color: #005f99;
-                color: white;
-                border: none;
-                padding: 10px 15px;
-                cursor: pointer;
-                border-radius: 5px;
-            }
-            button:hover {
-                background-color: #004d80;
-            }
-        </style>    
-</head>
-<body>
-    <h1>ویرایش اطلاعات کاربر</h1>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">ذخیره تغییرات</button>
-    </form>
-
-    <a href="{% url 'profile' %}">بازگشت به پروفایل</a>
-</body>
-</html>
+{% extends "store/base.html" %}
+{% block title %}ویرایش اطلاعات کاربر{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title mb-3">ویرایش اطلاعات کاربر</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                        {% if field.name != 'skin_type' and field.name != 'device_type' and field.name != 'concerns' %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {% if field.name == 'first_name' %}نام{% elif field.name == 'last_name' %}نام خانوادگی{% elif field.name == 'username' %}نام کاربری{% elif field.name == 'email' %}ایمیل{% else %}{{ field.label }}{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                {% if field.name == 'first_name' %}
+                                    نام کوچک خود را وارد کنید.
+                                {% elif field.name == 'last_name' %}
+                                    نام خانوادگی خود را وارد کنید.
+                                {% elif field.name == 'username' %}
+                                    نام کاربری دلخواه برای ورود و نمایش عمومی.
+                                {% elif field.name == 'email' %}
+                                    ایمیل معتبر برای ارتباط و بازیابی رمز.
+                                {% else %}
+                                    {{ field.help_text|default:"لطفاً این فیلد را پر کنید." }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">بازگشت به پروفایل</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
