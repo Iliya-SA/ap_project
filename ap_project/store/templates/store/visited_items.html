@@ -3,9 +3,9 @@
 {% block content %}
   <h2>محصولات بازدیدشده</h2>
   <ul>
-  {% for item in visited_items|slice:":-1" %}
+  {% for item in visited_items %}
       <li>
-        محصول: {{ item.product_id }} | زمان بازدید: {{ item.visit_time }}
+        محصول: <a href="{{ item.url }}">{{ item.name }}</a> | زمان بازدید: {{ item.visit_time }}
       </li>
     {% empty %}
       <li>هیچ محصولی بازدید نشده است.</li>

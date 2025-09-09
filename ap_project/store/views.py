@@ -218,7 +218,18 @@ def autocomplete_search(request):
 def visited_items_view(request):
     profile = getattr(request.user, 'profile', None)
     visited = profile.visited_items if profile else []
-    return render(request, 'store/visited_items.html', {'visited_items': visited[::-1][:20]})
+    # Get product info for each visited item
+    visited_products = []
+    for item in visited[::-1][:20]:
+        product = Product.objects.filter(id=item.get('product_id')).first()
+        if product:
+            visited_products.append({
+                'product_id': product.id,
+                'name': product.name,
+                'visit_time': item.get('visit_time'),
+                'url': f'/products/{product.id}/'  # Now matches new URL pattern
+            })
+    return render(request, 'store/visited_items.html', {'visited_items': visited_products})
 
 @login_required
 def favorites_list_view(request):
