@@ -4,6 +4,11 @@
 {% block title %}محصولات مورد علاقه شما{% endblock %}
 
 {% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
+        <a href="/" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
+    </div>
+</div>
 <h3 class="mb-4">محصولات مورد علاقه شما</h3>
 
 <div class="row">
@@ -24,7 +29,7 @@
                 <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
                 <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
             </p>
-            <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+            <a href="/products/{{ product.pk }}/" class="btn btn-sm btn-primary">مشاهده</a>
         </div>
     </div>
     {% empty %}

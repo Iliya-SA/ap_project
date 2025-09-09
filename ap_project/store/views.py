@@ -1,6 +1,45 @@
+def products_page_view(request):
+    return render(request, 'store/all_products.html')
+from django.http import JsonResponse
+def all_products_view(request):
+    from products.models import Product, Comment
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
+    sort = request.GET.get('sort', 'newest')
+    page = int(request.GET.get('page', 1))
+    page_size = 16
+    qs = Product.objects.annotate(
+        avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+        comment_count=Coalesce(Count('comments'), 0)
+    )
+    if sort == 'newest':
+        qs = qs.order_by('-created_at')
+    elif sort == 'cheapest':
+        qs = qs.order_by('price')
+    elif sort == 'expensive':
+        qs = qs.order_by('-price')
+    elif sort == 'alpha_asc':
+        qs = qs.order_by('name')
+    elif sort == 'alpha_desc':
+        qs = qs.order_by('-name')
+    start = (page - 1) * page_size
+    end = start + page_size
+    products = qs[start:end]
+    has_more = qs.count() > end
+    data = []
+    for p in products:
+        data.append({
+            'id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'image_url': p.image.url if p.image else '',
+            'stock': p.stock,
+            'avg_rating': float(getattr(p, 'avg_rating', 0.0)),
+        })
+    return JsonResponse({'products': data, 'has_more': has_more})
 from django.shortcuts import render , redirect
 from django.utils import timezone
-from products.models import Product
+from products.models import Product, Comment
 from orders.models import Order
 from django.http import JsonResponse
 from django.db.models import Count, Avg, F, FloatField, ExpressionWrapper, Func, Q
@@ -97,18 +136,25 @@ def store_view(request):
     new_products = Product.objects.annotate(
         avg_rating=Coalesce(Avg('comments__rating'), 0.0),
         comment_count=Coalesce(Count('comments'), 0)
-    ).order_by('-created_at')[:10]
+    ).order_by('-created_at')[:12]
 
-    # محصولات پیشنهادی با آنوتیت
+    # محصولات پیشنهادی برای پوست کاربر: محصولات با skin_type شامل نوع پوست و avg_rating >= 3.0
     recommended_products = []
-    if request.user.is_authenticated:
-        if hasattr(request.user, 'profile') and request.user.profile.skin_type:
-            recommended_products = Product.objects.filter(
-                skin_type=request.user.profile.skin_type
-            ).annotate(
-                avg_rating=Coalesce(Avg('comments__rating'), 0.0),
-                comment_count=Coalesce(Count('comments'), 0)
-            ).order_by('-avg_rating')[:10]
+    if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.skin_type:
+        skin_type = request.user.profile.skin_type
+        # Pick 40 random products matching skin_type and avg_rating >= 3.0
+        qs_40 = Product.objects.annotate(
+            avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+            comment_count=Coalesce(Count('comments'), 0)
+        ).filter(
+            skin_type__icontains=skin_type,
+            avg_rating__gte=3.0
+        ).order_by('?')[:40]
+        # From those 40, pick 10 at random
+        import random
+        products_10 = random.sample(list(qs_40), min(10, len(qs_40))) if qs_40 else []
+        # Sort by avg_rating descending
+        recommended_products = sorted(products_10, key=lambda p: getattr(p, 'avg_rating', 0.0), reverse=True)
 
     # محصولات مورد علاقه: دو بخش جدا
     if request.user.is_authenticated and hasattr(request.user, 'profile'):
@@ -146,11 +192,83 @@ def store_view(request):
 
         liked_favorites = annotate_products(liked_favorites)
         recent_purchases = annotate_products(recent_purchases)
+    # محصولات فصلی با شباهت کسینوسی به توکن‌های فصل
+    import numpy as np
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    from products.seasonal_vectors import SEASONAL_VECTORS
+
     season = get_persian_season()
-    seasonal_products = Product.objects.filter(tags__contains=[season]).annotate(
+    season_map = {'بهار': 'spring', 'تابستان': 'summer', 'پاییز': 'autumn', 'زمستان': 'winter'}
+    season_key = season_map.get(season, 'spring')
+    season_tokens = SEASONAL_VECTORS.get(season_key, [])
+
+    # Select products with avg_rating >= 3.0, pick up to 40 at random for similarity comparison
+    high_rated_qs = Product.objects.annotate(
         avg_rating=Coalesce(Avg('comments__rating'), 0.0),
         comment_count=Coalesce(Count('comments'), 0)
-    ).order_by('-avg_rating')[:10]
+    ).filter(avg_rating__gte=3.0).order_by('?')[:40]
+    all_products = list(high_rated_qs)
+    def get_product_tokens(product):
+        pt = getattr(product, 'products_tokens', {})
+        if isinstance(pt, dict):
+            if 'tokens' in pt and isinstance(pt['tokens'], list):
+                return pt['tokens']
+            else:
+                tmp = []
+                for v in pt.values():
+                    if isinstance(v, list):
+                        tmp.extend(v)
+                return tmp
+        elif isinstance(pt, list):
+            return pt
+        tokens = []
+        for field in ['name', 'description', 'brand', 'category']:
+            val = getattr(product, field, '')
+            if val:
+                tokens.append(str(val))
+        return tokens
+
+    product_corpus = [" ".join(get_product_tokens(p)) for p in all_products]
+    season_text = " ".join(season_tokens)
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(product_corpus + [season_text])
+
+    similarities = cosine_similarity(X[:-1], X[-1].reshape(1, -1)).ravel()
+    top_indices = np.argsort(similarities)[::-1][:10]
+
+    # Ensure products have avg_rating annotated (so template stars show correctly)
+    top_ids = [all_products[i].id for i in top_indices] if len(all_products) > 0 else []
+    annotated_qs = Product.objects.filter(id__in=top_ids).annotate(
+        avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+        comment_count=Coalesce(Count('comments'), 0)
+    )
+    annotated_map = {p.id: p for p in annotated_qs}
+
+    seasonal_products = []
+    for i in top_indices:
+        # preserve similarity ordering (top_indices is sorted by similarity desc)
+        pid = all_products[i].id
+        prod = annotated_map.get(pid) or all_products[i]
+        # attach similarity score for potential debug/display
+        setattr(prod, 'similarity_score', float(similarities[i]))
+        # ensure avg_rating is present and numeric (use model/helper as fallback)
+        try:
+            avg = getattr(prod, 'avg_rating', None)
+            if avg is None:
+                agg = Comment.objects.filter(product_id=pid).aggregate(avg=Avg('rating'))
+                avg = agg.get('avg') if agg else None
+                if avg is None:
+                    avg = prod.average_rating() if hasattr(prod, 'average_rating') else 0.0
+        except Exception:
+            avg = 0.0
+        try:
+            prod.avg_rating = float(avg or 0.0)
+        except Exception:
+            prod.avg_rating = 0.0
+        seasonal_products.append(prod)
+
+    # seasonal_products are returned in descending similarity order; do not re-sort by rating
 
     return render(request, 'store/store_home.html', {
         'new_products': new_products,
@@ -209,9 +327,7 @@ def autocomplete_search(request):
             Q(category__icontains=query) |
             Q(skin_type__icontains=query)
         ).distinct()[:10]
-
-        results = [product.name for product in products]
-
+        results = [{'id': product.id, 'name': product.name} for product in products]
     return JsonResponse(results, safe=False)
 
 @login_required
@@ -241,14 +357,67 @@ def favorites_list_view(request):
     return render(request, 'store/favorites_list.html', {'products': products})
 
 def seasonal_products_view(request):
+
+    from products.seasonal_vectors import SEASONAL_VECTORS
+    import numpy as np
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+
     season = get_persian_season()
-    products = Product.objects.filter(tags__contains=[season]).annotate(
+    season_map = {'بهار': 'spring', 'تابستان': 'summer', 'پاییز': 'autumn', 'زمستان': 'winter'}
+    season_key = season_map.get(season, 'spring')
+    season_tokens = SEASONAL_VECTORS.get(season_key, [])
+    # Only consider products with avg_rating >= 3.0
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
+    high_rated_qs = Product.objects.annotate(
         avg_rating=Coalesce(Avg('comments__rating'), 0.0),
         comment_count=Coalesce(Count('comments'), 0)
-    ).order_by('-avg_rating')
-    
+    ).filter(avg_rating__gte=3.0)
+    all_products = list(high_rated_qs)
+    def get_product_tokens(product):
+        pt = getattr(product, 'products_tokens', {})
+        if isinstance(pt, dict):
+            if 'tokens' in pt and isinstance(pt['tokens'], list):
+                return pt['tokens']
+            else:
+                tmp = []
+                for v in pt.values():
+                    if isinstance(v, list):
+                        tmp.extend(v)
+                return tmp
+        elif isinstance(pt, list):
+            return pt
+        tokens = []
+        for field in ['name', 'description', 'brand', 'category']:
+            val = getattr(product, field, '')
+            if val:
+                tokens.append(str(val))
+        return tokens
+    product_corpus = [" ".join(get_product_tokens(p)) for p in all_products]
+    season_text = " ".join(season_tokens)
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(product_corpus + [season_text])
+    similarities = cosine_similarity(X[:-1], X[-1].reshape(1, -1)).ravel()
+    # Filter products with similarity > 0.1
+    filtered = [(p, float(similarities[i])) for i, p in enumerate(all_products) if similarities[i] > 0.1]
+    # Sort by similarity descending
+    filtered_sorted = sorted(filtered, key=lambda x: x[1], reverse=True)
+    # Annotate avg_rating and pass similarity_score
+    filtered_ids = [p.id for p, _ in filtered_sorted]
+    annotated_qs = Product.objects.filter(id__in=filtered_ids).annotate(
+        avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+        comment_count=Coalesce(Count('comments'), 0)
+    )
+    annotated_map = {p.id: p for p in annotated_qs}
+    seasonal_products = []
+    for pid, sim in zip(filtered_ids, [s for _, s in filtered_sorted]):
+        prod = annotated_map.get(pid)
+        if prod:
+            setattr(prod, 'similarity_score', sim)
+            seasonal_products.append(prod)
     return render(request, 'context/seasonal_products.html', {
-        'products': products,
+        'seasonal_products': seasonal_products,
         'season': season
     })
 

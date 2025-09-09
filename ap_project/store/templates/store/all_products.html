@@ -1,0 +1,76 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+{% block title %}همه محصولات{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
+    <a href="/" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
+  </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5>همه محصولات</h5>
+    <select id="sort-select" class="form-select w-auto">
+      <option value="newest">جدیدترین</option>
+      <option value="cheapest">ارزان‌ترین</option>
+      <option value="expensive">گران‌ترین</option>
+      <option value="alpha_asc">الفبایی (صعودی)</option>
+      <option value="alpha_desc">الفبایی (نزولی)</option>
+    </select>
+  </div>
+  <div id="products-grid" class="row"></div>
+  <div id="loading" class="text-center my-3" style="display:none;">
+    <span class="spinner-border"></span>
+    <span>در حال بارگذاری...</span>
+  </div>
+</div>
+<script>
+let page = 1;
+let loading = false;
+let sort = 'newest';
+function loadProducts(reset=false) {
+  if (loading) return;
+  loading = true;
+  document.getElementById('loading').style.display = '';
+  fetch(`/products/all/?page=${page}&sort=${sort}`)
+    .then(res => res.json())
+    .then(data => {
+      const grid = document.getElementById('products-grid');
+      if (reset) grid.innerHTML = '';
+      data.products.forEach(product => {
+        const col = document.createElement('div');
+        col.className = 'col-md-3 col-sm-6';
+        col.innerHTML = `
+          <div class="product-card">
+            <img src="${product.image_url}" alt="${product.name}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+            <h6 class="mt-2">${product.name}</h6>
+            <p class="text-success fw-bold mb-1">${product.price.toLocaleString()} تومان</p>
+            ${product.stock > 0 ? '<p class="text-success small mb-1">موجود</p>' : '<p class="text-danger small mb-1">ناموجود</p>'}
+            <div class="mb-2 d-flex align-items-center gap-1">
+              <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+              <span>${product.avg_rating.toFixed(1)}</span>
+            </div>
+            <a href="/products/${product.id}/" class="btn btn-sm btn-primary">مشاهده</a>
+          </div>
+        `;
+        grid.appendChild(col);
+      });
+      loading = false;
+      document.getElementById('loading').style.display = 'none';
+      if (!data.has_more) window.removeEventListener('scroll', scrollHandler);
+    });
+}
+function scrollHandler() {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+    page++;
+    loadProducts();
+  }
+}
+document.getElementById('sort-select').addEventListener('change', function() {
+  sort = this.value;
+  page = 1;
+  loadProducts(true);
+  window.addEventListener('scroll', scrollHandler);
+});
+window.addEventListener('scroll', scrollHandler);
+loadProducts();
+</script>
+{% endblock %}

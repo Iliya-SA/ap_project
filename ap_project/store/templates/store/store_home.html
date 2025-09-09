@@ -6,7 +6,10 @@
 
 {% block content %}
 <section>
-    <h5>جدیدترین محصولات</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>جدیدترین محصولات</h5>
+    <a href="/products" class="btn btn-sm btn-outline-primary">مشاهده همه</a>
+    </div>
     <div class="row">
         {% for product in new_products %}
         <div class="col-md-3 col-sm-6">
@@ -36,36 +39,32 @@
 
 <section class="mt-4">
     <h5>محصولات پیشنهادی برای پوست شما {% if user.profile.skin_type %}({{ user.profile.skin_type }}){% endif %}</h5>
-    <div class="row">
-        {% for product in recommended_products %}
-        <div class="col-md-3 col-sm-6">
-            <div class="product-card">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                <h6>{{ product.name }}</h6>
-                <p class="text-success fw-bold" style="color: #1b5e20;">
-                    {{ product.price|intcomma }} تومان
-                </p>
-                <p class="mb-1">
-                    {% if product.stock > 0 %}
-                        <span class="badge bg-success">موجود</span>
-                    {% else %}
-                        <span class="badge bg-danger">ناموجود</span>
-                    {% endif %}
-                </p>
-                <p class="mb-2 d-flex align-items-center gap-1">
-                    <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                    <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                </p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                {% else %}
-                    <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                {% endif %}
+    <div>
+        {% if not user.is_authenticated %}
+            <p>ابتدا وارد حساب کاربری خود شوید</p>
+        {% elif recommended_products %}
+            <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
+                {% for product in recommended_products %}
+                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                        <h6 class="mt-2">{{ product.name }}</h6>
+                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
+                        {% if product.stock > 0 %}
+                            <p class="text-success small mb-1">موجود</p>
+                        {% else %}
+                            <p class="text-danger small mb-1">ناموجود</p>
+                        {% endif %}
+                        <div class="mb-2 d-flex align-items-center gap-1">
+                            <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        </div>
+                        <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                    </div>
+                {% endfor %}
             </div>
-        </div>
-        {% empty %}
-        <p>محصول پیشنهادی موجود نیست.</p>
-        {% endfor %}
+        {% else %}
+            <p>محصول پیشنهادی موجود نیست.</p>
+        {% endif %}
     </div>
 </section>
 
@@ -74,49 +73,10 @@
         <h5>محصولات فصل {{ season }}</h5>
         <a href="{% url 'seasonal-products' %}" class="btn btn-sm btn-outline-primary">مشاهده همه محصولات فصل</a>
     </div>
-    <div class="row">
-        {% for product in seasonal_products %}
-        <div class="col-md-3 col-sm-6">
-            <div class="product-card">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                <h6>{{ product.name }}</h6>
-                <p class="text-success fw-bold" style="color: #1b5e20;">
-                    {{ product.price|intcomma }} تومان
-                </p>
-                <p class="mb-1">
-                    {% if product.stock > 0 %}
-                        <span class="badge bg-success">موجود</span>
-                    {% else %}
-                        <span class="badge bg-danger">ناموجود</span>
-                    {% endif %}
-                </p>
-                <p class="mb-2 d-flex align-items-center gap-1">
-                    <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                    <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                </p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                {% else %}
-                    <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                {% endif %}
-            </div>
-        </div>
-        {% empty %}
-        <p>محصول فصلی‌ای یافت نشد.</p>
-        {% endfor %}
-    </div>
-</section>
-
-<section class="mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5>محصولات مورد علاقه شما</h5>
-        <a href="{% url 'favorites-list' %}" class="btn btn-sm btn-outline-primary">نمایش همه علاقه‌مندی‌ها</a>
-    </div>
-
     <div>
-        {% if liked_favorites %}
-            <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3">
-                {% for product in liked_favorites|slice:":10" %}
+        {% if seasonal_products %}
+            <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
+                {% for product in seasonal_products %}
                     <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
                         <h6 class="mt-2">{{ product.name }}</h6>
@@ -135,6 +95,43 @@
                         {% else %}
                             <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
                         {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>محصول فصلی‌ای یافت نشد.</p>
+        {% endif %}
+    </div>
+</section>
+
+</section>
+
+<section class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>محصولات مورد علاقه شما</h5>
+        <a href="{% url 'favorites-list' %}" class="btn btn-sm btn-outline-primary">نمایش همه علاقه‌مندی‌ها</a>
+    </div>
+
+    <div>
+        {% if not user.is_authenticated %}
+            <p>ابتدا وارد حساب کاربری خود شوید</p>
+        {% elif liked_favorites %}
+            <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
+                {% for product in liked_favorites|slice:":10" %}
+                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                        <h6 class="mt-2">{{ product.name }}</h6>
+                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
+                        {% if product.stock > 0 %}
+                            <p class="text-success small mb-1">موجود</p>
+                        {% else %}
+                            <p class="text-danger small mb-1">ناموجود</p>
+                        {% endif %}
+                        <div class="mb-2 d-flex align-items-center gap-1">
+                            <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        </div>
+                        <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
                     </div>
                 {% endfor %}
             </div>

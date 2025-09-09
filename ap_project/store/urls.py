@@ -3,6 +3,7 @@ from .views import (
     store_view, visited_items_view, contact_feedback_view,
     favorites_list_view, seasonal_products_view, routine
 )
+from .views import all_products_view, products_page_view
 from . import views
 
 urlpatterns = [
@@ -16,4 +17,6 @@ urlpatterns = [
     path('visited-items/', visited_items_view, name='visited-items'),
     path("routine/", routine, name="routine"),
     path("routine/full-plan/", views.full_plan, name="full_plan"),
+    path('products/', products_page_view, name='products-page'),
+    path('products/all/', all_products_view, name='all-products'),
 ]
