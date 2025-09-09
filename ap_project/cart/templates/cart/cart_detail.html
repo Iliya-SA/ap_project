@@ -105,45 +105,123 @@
 
 <div class="container mt-4">
     {% if cart.items.count > 0 %}
-        <form method="POST" action="{% url 'update-cart' %}">
+        <form id="update-cart-form" method="POST" action="{% url 'update-cart' %}">
             {% csrf_token %}
             {% for item in cart.items.all %}
-                <div class="cart-item">
+                <div class="cart-item" data-item-id="{{ item.id }}">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                     <div class="cart-item-details">
                         <h5>{{ item.product.name }}</h5>
                         <p class="text-muted">{{ item.product.brand }}</p>
                         <p>دسته‌بندی: {{ item.product.category }}</p>
-                        <p class="text-success">{{ item.product.price|intcomma }} تومان</p>
+                        <p class="mb-1">قیمت واحد: <span class="product-price" data-price="{{ item.product.price }}">{{ item.product.price|intcomma }}</span> تومان</p>
+                        <p class="item-total small text-muted">جمع: <span class="item-total-amount">{{ item.total_price|floatformat:0|intcomma }}</span> تومان</p>
                     </div>
                     <div class="cart-item-quantity">
                         <label for="quantity_{{ item.id }}" class="form-label">تعداد:</label>
-                        <input type="number" min="1" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}" value="{{ item.quantity }}" class="form-control">
+                        <input type="number" min="1" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}" value="{{ item.quantity }}" class="form-control quantity-input">
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-danger remove-item-btn" data-item-id="{{ item.id }}">حذف</button>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
             <div class="total-section text-end">
                 جمع کل: {{ cart.total_price|intcomma }} تومان
             </div>
-            <button type="submit" class="btn btn-primary btn-complete">بروزرسانی تعداد</button>
+            <!-- update button removed: quantities update automatically on change -->
         </form>
 
-        <form method="POST" action="{% url 'checkout' %}">
+        <form id="checkout-form" method="POST" action="{% url 'checkout' %}">
             {% csrf_token %}
+            <!-- hidden container for quantity fields to be submitted to checkout -->
+            <div id="checkout-quantities"></div>
             <button type="submit" class="btn btn-success btn-complete">تکمیل خرید</button>
         </form>
-
-        <a href="{% url 'order-history' %}" class="btn btn-outline-secondary btn-complete mt-3">
-            مشاهده تاریخچه سفارش‌ها
-        </a>
-
     {% else %}
         <div class="alert alert-info mt-4">
             سبد خرید شما خالی است.
         </div>
     {% endif %}
+    
+    <!-- Always show order history link even when cart is empty -->
+    <a href="{% url 'order-history' %}" class="btn btn-outline-secondary btn-complete mt-3">
+        مشاهده تاریخچه سفارش‌ها
+    </a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.remove-item-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var itemId = btn.getAttribute('data-item-id');
+            var qtyInput = document.getElementById('quantity_' + itemId);
+            if (qtyInput) {
+                qtyInput.value = 0; // update-cart view treats 0 as delete
+                // submit the update form
+                var form = document.getElementById('update-cart-form');
+                if (form) form.submit();
+            }
+        });
+    });
+
+    // auto update when quantity changes
+    document.querySelectorAll('.quantity-input').forEach(function(inp){
+        inp.addEventListener('change', function(){
+            var val = parseInt(inp.value) || 0;
+            if(val < 1){
+                // treat as delete
+                inp.value = 0;
+            }
+            var itemId = inp.id.split('_')[1];
+            // update line total immediately on client
+            var row = document.querySelector('.cart-item[data-item-id="'+itemId+'"]');
+            if(row){
+                var priceSpan = row.querySelector('.product-price');
+                var price = parseFloat(priceSpan.getAttribute('data-price')) || 0;
+                var totalAmt = price * (parseInt(inp.value) || 0);
+                var totalSpan = row.querySelector('.item-total-amount');
+                if(totalSpan) totalSpan.textContent = Math.round(totalAmt).toLocaleString();
+            }
+
+            // send AJAX to update server
+            var formData = new URLSearchParams();
+            formData.append(inp.name, inp.value);
+
+            fetch('{% url "update-cart" %}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            }).then(res => res.json())
+            .then(data => {
+                // update cart total if provided
+                if(data && data.cart_total !== undefined){
+                    document.querySelector('.total-section span')?.remove();
+                    var totalSection = document.querySelector('.total-section');
+                    if(totalSection) totalSection.innerHTML = 'جمع کل: ' + Number(data.cart_total).toLocaleString() + ' تومان';
+                }
+            }).catch(err => console.error(err));
+        });
+    });
+});
+</script>
+<script>
+// Before submitting checkout, copy current quantity inputs into hidden fields in the checkout form
+document.getElementById('checkout-form').addEventListener('submit', function(e){
+    var container = document.getElementById('checkout-quantities');
+    container.innerHTML = '';
+    document.querySelectorAll('input[id^="quantity_"]').forEach(function(inp){
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = inp.name; // quantity_<id>
+        hidden.value = inp.value;
+        container.appendChild(hidden);
+    });
+});
+</script>
 </body>
 </html>
