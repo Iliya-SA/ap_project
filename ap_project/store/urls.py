@@ -17,6 +17,8 @@ urlpatterns = [
     path('visited-items/', visited_items_view, name='visited-items'),
     path("routine/", routine, name="routine"),
     path("routine/full-plan/", views.full_plan, name="full_plan"),
+    path("routine/hydration-plan/", views.hydration_plan, name="hydration_plan"),
+    path("routine/minimal-plan/", views.minimal_plan, name="minimal_plan"),
     path('products/', products_page_view, name='products-page'),
     path('products/all/', all_products_view, name='all-products'),
 ]

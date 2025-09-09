@@ -1,0 +1,49 @@
+{% extends 'store/base.html' %}
+{% load humanize %}
+{% block title %}طرح مینیمالیستی - روتین پوستی{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
+    <a href="{% url 'routine' %}" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
+  </div>
+
+  <h2 class="mb-4">{{ plan_name }}</h2>
+
+  {% for row in rows %}
+  {% if row.category == 'پاک کننده' or row.category == 'مرطوب‌کننده' or row.category == 'ضدآفتاب' %}
+    <section class="mb-5">
+      <h5 class="mb-2">{{ row.category }}</h5>
+      {% if row.category == 'پاک کننده' %}
+  <p class="text-muted">برای شروع یک روتین پوستی سالم، همیشه با پاک‌کننده آغاز کنید! صبح و شب صورت خود را با یک فوم یا ژل ملایم بشویید تا آلودگی، چربی و آرایش از پوستتان پاک شود. آب ولرم بهترین انتخاب است و بعد از شست‌وشو، پوست را با حوله تمیز به آرامی خشک کنید. این مرحله کمک می‌کند محصولات بعدی بهتر جذب شوند و پوستتان همیشه شاداب بماند.</p>
+      {% elif row.category == 'سرم' %}
+        <p class="text-muted">سرم یک محصول مؤثر است که می‌تواند نیاز اصلی پوست را هدف قرار دهد.</p>
+      {% elif row.category == 'مرطوب‌کننده' %}
+  <p class="text-muted">مرطوب‌کننده دوست همیشگی پوست شماست! بعد از تونر و سرم، مقدار کافی مرطوب‌کننده را روی صورت و گردن بزنید و به آرامی ماساژ دهید تا جذب شود. این کار را صبح و شب انجام دهید تا پوستتان نرم، لطیف و درخشان بماند. اگر پوست خیلی خشکی دارید، در طول روز هم می‌توانید تمدید کنید.</p>
+      {% elif row.category == 'ضدآفتاب' %}
+  <p class="text-muted">ضدآفتاب مهم‌ترین بخش روتین روزانه است! هر روز صبح، حتی در روزهای ابری یا داخل خانه، مقدار کافی ضدآفتاب را به کل صورت و گردن بزنید. ۳۰ دقیقه قبل از خروج از منزل استفاده کنید و اگر مدت طولانی بیرون هستید یا عرق کردید، هر ۲ تا ۳ ساعت تمدید کنید. با این کار از پوستتان در برابر پیری زودرس و آسیب‌های آفتاب محافظت می‌کنید.</p>
+      {% endif %}
+      <div class="related-row d-flex overflow-auto gap-3 py-2">
+  {% for product in row.products %}
+          <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+            <h6 class="mt-2">{{ product.name }}</h6>
+            <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
+            {% if product.stock > 0 %}
+              <p class="text-success small mb-1">موجود</p>
+            {% else %}
+              <p class="text-danger small mb-1">ناموجود</p>
+            {% endif %}
+            <div class="mb-2 d-flex align-items-center gap-1">
+              <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+              <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+            </div>
+            <a href="/products/{{ product.pk }}/" class="btn btn-sm btn-primary">مشاهده</a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

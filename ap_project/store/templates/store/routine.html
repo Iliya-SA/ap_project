@@ -22,16 +22,8 @@
 
 						<div class="d-grid gap-3" style="grid-template-columns: 1fr;">
 							<a href="{% url 'full_plan' %}" class="btn btn-primary btn-lg w-100 py-3">طرح کامل</a>
-
-							<form method="post" class="w-100">{% csrf_token %}
-								<input type="hidden" name="plan" value="Hydration Plan">
-								<button class="btn btn-success btn-lg w-100 py-3" type="submit">طرح آبرسانی</button>
-							</form>
-
-							<form method="post" class="w-100">{% csrf_token %}
-								<input type="hidden" name="plan" value="Minimalist Plan">
-								<button class="btn btn-secondary btn-lg w-100 py-3" type="submit">طرح مینیمالیستی</button>
-							</form>
+							<a href="{% url 'hydration_plan' %}" class="btn btn-success btn-lg w-100 py-3">طرح آبرسانی</a>
+							<a href="{% url 'minimal_plan' %}" class="btn btn-secondary btn-lg w-100 py-3">طرح مینیمالیستی</a>
 						</div>
 					{% else %}
 						<h1 class="mb-4">هنوز آزمون روتین پوستی را نداده‌اید؟</h1>

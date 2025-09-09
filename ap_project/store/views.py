@@ -428,7 +428,8 @@ def full_plan(request):
     cats = [
         ('پاک کننده', ['پاک کننده', 'پاک‌کننده']),
         ('تونر', ['تونر']),
-        ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده']),
+        ('سرم', ['سرم']),
+        ('روشن کننده', ['روشن کننده']),
         ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده']),
         ('ضدآفتاب', ['ضدآفتاب', 'ضد آفتاب'])
     ]
@@ -439,12 +440,18 @@ def full_plan(request):
     recs = compute_recommendations(products, purchases, user_prefs or {}, keywords or {}, user_id=user_id)
     scored_products = {r['product_id']: r['final_score'] for r in recs['recommendations']}
     rows = []
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
     for label, queries in cats:
         q = Q()
         for cat in queries:
             q |= Q(category__icontains=cat)
         prods = Product.objects.filter(q)
-        # Annotate with score, sort, and take top 10
+        # Annotate with score and avg_rating, sort, and take top 10
+        prods = prods.annotate(
+            avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+            comment_count=Coalesce(Count('comments'), 0)
+        )
         prods = [p for p in prods if p.id in scored_products]
         for p in prods:
             p.final_score = scored_products.get(p.id, None)
@@ -454,6 +461,77 @@ def full_plan(request):
     return render(request, 'store/full_plan.html', {
         'rows': rows,
         'plan_name': 'طرح کامل'
+    })
+
+def hydration_plan(request):
+    from recommendation.views import build_products_from_db, build_purchases_from_db, get_user_preferences_from_db, compute_recommendations
+    cats = [
+        ('پاک کننده', ['پاک کننده', 'پاک‌کننده']),
+        ('تونر', ['تونر']),
+        ('سرم', ['سرم']),
+        ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده'])
+    ]
+    user_id = request.user.username if request.user.is_authenticated else 'u1'
+    products = build_products_from_db(user_id=user_id)
+    purchases = build_purchases_from_db(user_id=user_id)
+    user_prefs, keywords = get_user_preferences_from_db(user_id=user_id)
+    recs = compute_recommendations(products, purchases, user_prefs or {}, keywords or {}, user_id=user_id)
+    scored_products = {r['product_id']: r['final_score'] for r in recs['recommendations']}
+    rows = []
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
+    for label, queries in cats:
+        q = Q()
+        for cat in queries:
+            q |= Q(category__icontains=cat)
+        prods = Product.objects.filter(q)
+        prods = prods.annotate(
+            avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+            comment_count=Coalesce(Count('comments'), 0)
+        )
+        prods = [p for p in prods if p.id in scored_products]
+        for p in prods:
+            p.final_score = scored_products.get(p.id, None)
+        prods = sorted(prods, key=lambda p: p.final_score if p.final_score is not None else 0, reverse=True)[:10]
+        rows.append({'category': label, 'products': prods})
+    return render(request, 'store/hydration_plan.html', {
+        'rows': rows,
+        'plan_name': 'طرح آبرسان'
+    })
+
+def minimal_plan(request):
+    from recommendation.views import build_products_from_db, build_purchases_from_db, get_user_preferences_from_db, compute_recommendations
+    cats = [
+        ('پاک کننده', ['پاک کننده', 'پاک‌کننده']),
+        ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده']),
+        ('ضدآفتاب', ['ضدآفتاب', 'ضد آفتاب'])
+    ]
+    user_id = request.user.username if request.user.is_authenticated else 'u1'
+    products = build_products_from_db(user_id=user_id)
+    purchases = build_purchases_from_db(user_id=user_id)
+    user_prefs, keywords = get_user_preferences_from_db(user_id=user_id)
+    recs = compute_recommendations(products, purchases, user_prefs or {}, keywords or {}, user_id=user_id)
+    scored_products = {r['product_id']: r['final_score'] for r in recs['recommendations']}
+    rows = []
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
+    for label, queries in cats:
+        q = Q()
+        for cat in queries:
+            q |= Q(category__icontains=cat)
+        prods = Product.objects.filter(q)
+        prods = prods.annotate(
+            avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+            comment_count=Coalesce(Count('comments'), 0)
+        )
+        prods = [p for p in prods if p.id in scored_products]
+        for p in prods:
+            p.final_score = scored_products.get(p.id, None)
+        prods = sorted(prods, key=lambda p: p.final_score if p.final_score is not None else 0, reverse=True)[:10]
+        rows.append({'category': label, 'products': prods})
+    return render(request, 'store/minimal_plan.html', {
+        'rows': rows,
+        'plan_name': 'طرح مینیمالیستی'
     })
 @login_required
 def routine(request):
