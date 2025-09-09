@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from cart.models import Cart, CartItem
 
 class ProductDetailView(DetailView):
     model = Product
@@ -24,13 +25,10 @@ class ProductDetailView(DetailView):
         # نظرات اخیر
         context['recent_comments'] = product.comments.order_by('-created_at')[:3]
 
-        # محصولات مرتبط با همان نوع پوست (skin_type) با بیشترین میانگین امتیاز
-        related_products = Product.objects.filter(
-            skin_type=product.skin_type
-        ).exclude(id=product.id).annotate(
-            avg_rating=Avg('comments__rating')
-        ).order_by('-avg_rating')[:5]
-        context['related_products'] = related_products
+        # محصولات مشابه بر اساس similar_products
+        similar_ids = product.similar_products if product.similar_products else []
+        similar_products = Product.objects.filter(id__in=similar_ids)
+        context['similar_products'] = similar_products
 
         # محصولات همان برند با بیشترین میانگین امتیاز
         brand_products = Product.objects.filter(
@@ -42,10 +40,22 @@ class ProductDetailView(DetailView):
 
         # وضعیت علاقه‌مندی محصول برای کاربر فعلی
         if user.is_authenticated:
-                profile = getattr(user, 'profile', None)
-                context['is_favorite'] = profile.favorites.filter(id=product.id).exists() if profile else False
+            profile = getattr(user, 'profile', None)
+            context['is_favorite'] = profile.favorites.filter(id=product.id).exists() if profile else False
+            # current quantity of this product in user's cart
+            try:
+                cart = Cart.objects.get(user=user)
+                cart_item = cart.items.filter(product=product).first()
+                context['in_cart_quantity'] = cart_item.quantity if cart_item else 0
+                context['cart_item_id'] = cart_item.id if cart_item else None
+                context['in_cart'] = True if cart_item and getattr(cart_item, 'quantity', 0) > 0 else False
+            except Cart.DoesNotExist:
+                context['in_cart_quantity'] = 0
+                context['cart_item_id'] = None
+                context['in_cart'] = False
         else:
             context['is_favorite'] = False
+            context['in_cart_quantity'] = 0
 
         skin_type_str = str(product.skin_type).replace('[','').replace(']','').replace("'", "")
         context['skin_type_str'] = skin_type_str

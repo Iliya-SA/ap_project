@@ -119,10 +119,96 @@
             margin-bottom: 5px;
         }
 
-        .comment-date {
-            font-size: 12px;
-            color: #999;
-        }
+    .product-image {
+        max-height: 350px;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        padding: 10px;
+        width: 100%;
+    }
+
+    .star-icon {
+        color: #fbc02d;
+        font-size: 20px;
+        vertical-align: middle;
+    }
+    .user-name {
+        font-size: 1.2rem;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .price-text {
+        color: #1b5e20;
+        font-weight: 700;
+        font-size: 28px;
+    }
+
+    .btn-buy {
+        font-size: 18px;
+        padding: 10px;
+    }
+
+    .related-card {
+        min-width: 210px;
+        width: 210px;
+        height: 230px;
+        box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease, transform 0.18s ease;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+    }
+    .related-card:hover {
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+        transform: translateY(-4px);
+        cursor: pointer;
+    }
+    .related-row.dragging .related-card {
+        cursor: grabbing !important;
+    }
+    .related-card img {
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 8px;
+        width: 100%;
+        display: block;
+    }
+    .related-card:hover {
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+        transform: translateY(-4px);
+    }
+
+    .comments-section {
+        max-width: 100%;
+    }
+
+    .comment-item {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgb(0 0 0 / 0.05);
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+
+    .comment-header {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .comment-date {
+        font-size: 12px;
+        color: #999;
+    }
     </style>
 </head>
 <body>
@@ -187,27 +273,55 @@
                 <p class="price-text">{{ product.price|floatformat:0|intcomma }} تومان</p>
             </div>
             {% if user.is_authenticated %}
-                <a href="{% url 'add-to-cart' product.pk %}" class="btn btn-success btn-buy mt-3 w-100">افزودن به سبد خرید</a>
+                <div class="d-flex gap-2 mt-3">
+                    {% if in_cart %}
+                        <div class="input-group" style="max-width:140px;">
+                            <button class="btn btn-outline-secondary" type="button" id="dec-qty">-</button>
+                            <input type="number" min="1" id="product-qty" value="{{ in_cart_quantity }}" class="form-control text-center" />
+                            <button class="btn btn-outline-secondary" type="button" id="inc-qty">+</button>
+                        </div>
+                        <button id="remove-from-cart-btn" data-item-id="{{ cart_item_id }}" class="btn btn-danger btn-buy">حذف از سبد خرید</button>
+                    {% else %}
+                        <button id="add-to-cart-btn" data-url="{% url 'add-to-cart' product.pk %}" class="btn btn-success btn-buy w-100">افزودن به سبد خرید</button>
+                    {% endif %}
+                </div>
+                <!-- نمایش تعداد فعلی در سبد حذف شد -->
             {% else %}
                 <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-success btn-buy mt-3 w-100">افزودن به سبد خرید</a>
             {% endif %}
         </div>
     </div>
 
+    <!-- toast container -->
+    <div id="cart-toast" style="position: fixed; left: 20px; bottom: 20px; z-index: 1060; display:none;">
+        <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    محصول به سبد خرید شما اضافه شد
+                </div>
+                <div class="toast-footer p-2">
+                    <a href="{% url 'cart-detail' %}" class="btn btn-light me-2" style="min-width:160px; padding:0.5rem 0.9rem;">رفتن به سبد خرید</a>
+                    <!-- close button visually removed but kept hidden so JS that binds to #close-toast doesn't error -->
+                    <button type="button" id="close-toast" class="btn btn-sm btn-outline-light" style="display:none;">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- محصولات مرتبط -->
     <section class="mt-5">
-        <h4 class="mb-3" style="font-weight:600;">محصولات مرتبط</h4>
+        <h4 class="mb-3" style="font-weight:600;">محصولات مشابه این محصول</h4>
         <div class="related-row d-flex overflow-auto gap-3 py-2">
-            {% for related in related_products %}
+            {% for similar in similar_products %}
             <div class="product-card related-card flex-shrink-0 text-center p-2" style="min-width:210px; width:210px;">
-                <img src="{{ related.image.url }}" alt="{{ related.name }}">
-                <h6 class="mt-2">{{ related.name }}</h6>
-                <p class="text-success fw-bold mb-1">{{ related.price|floatformat:0|intcomma }} تومان</p>
-                <a href="{% url 'product-detail' related.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
+                <img src="{{ similar.image.url }}" alt="{{ similar.name }}">
+                <h6 class="mt-2">{{ similar.name }}</h6>
+                <p class="text-success fw-bold mb-1">{{ similar.price|floatformat:0|intcomma }} تومان</p>
+                <a href="{% url 'product-detail' similar.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
             </div>
             {% empty %}
-            <p class="text-muted">محصول مرتبطی وجود ندارد.</p>
+            <p class="text-muted">محصول مشابهی وجود ندارد.</p>
             {% endfor %}
         </div>
     </section>
@@ -228,6 +342,235 @@
             {% endfor %}
         </div>
     </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('add-to-cart-btn');
+    var qtyInput = document.getElementById('product-qty');
+    var incBtn = document.getElementById('inc-qty');
+    var decBtn = document.getElementById('dec-qty');
+    // in-cart count display removed per UX request
+    // cart item id from context (may be empty string)
+    var cartItemId = '{{ cart_item_id|default:"" }}';
+
+    if (incBtn) incBtn.addEventListener('click', function(){
+        qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') + 1);
+        // if this product already has a cart item, notify server about quantity change
+        if(cartItemId){
+            sendQtyUpdateToServer(cartItemId, qtyInput.value);
+        }
+    });
+    if (decBtn) decBtn.addEventListener('click', function(){
+        qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1);
+        if(cartItemId){
+            sendQtyUpdateToServer(cartItemId, qtyInput.value);
+        }
+    });
+
+    // helper to send quantity update to server and update UI
+    function sendQtyUpdateToServer(itemId, qty){
+        if(!itemId) return;
+        var body = new URLSearchParams();
+        body.append('quantity_' + itemId, qty);
+        fetch('{% url "update-cart" %}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: body
+        }).then(r => r.json()).then(function(d){
+            if(d){
+                if(d.item_quantity !== undefined && inCartSpan){
+                    inCartSpan.textContent = d.item_quantity;
+                }
+                if(d.cart_total !== undefined){
+                    var totalSection = document.querySelector('.total-section');
+                    if(totalSection) totalSection.innerHTML = 'جمع کل: ' + Number(d.cart_total).toLocaleString() + ' تومان';
+                }
+            }
+        }).catch(function(e){ console.error(e); });
+    }
+
+    // if qty input exists on page load (product already in cart), attach change handler
+    if(qtyInput && cartItemId){
+        qtyInput.addEventListener('change', function(){
+            sendQtyUpdateToServer(cartItemId, qtyInput.value);
+        });
+    }
+
+    if (btn) {
+        btn.addEventListener('click', function(){
+            var url = btn.getAttribute('data-url');
+            var qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+            var body = new URLSearchParams();
+            body.append('quantity', qty);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: body
+            }).then(response => response.json())
+            .then(data => {
+                // update in-cart count from server
+                    if(data && data.item_quantity !== undefined){
+                    showCartToast(data.item_quantity);
+
+                    // replace add button with a container that has qty selector + remove button
+                    var addBtn = document.getElementById('add-to-cart-btn');
+                    if(addBtn){
+                        var parent = addBtn.parentNode;
+                        var container = document.createElement('div');
+                        container.className = 'd-flex gap-2 mt-3';
+
+                        // create input group
+                        var inputGroup = document.createElement('div');
+                        inputGroup.className = 'input-group';
+                        inputGroup.style.maxWidth = '140px';
+
+                        var dec = document.createElement('button');
+                        dec.className = 'btn btn-outline-secondary';
+                        dec.type = 'button';
+                        dec.id = 'dec-qty';
+                        dec.textContent = '-';
+
+                        var qtyInp = document.createElement('input');
+                        qtyInp.type = 'number';
+                        qtyInp.min = '1';
+                        qtyInp.id = 'product-qty';
+                        qtyInp.className = 'form-control text-center';
+                        qtyInp.value = data.item_quantity;
+
+                        var inc = document.createElement('button');
+                        inc.className = 'btn btn-outline-secondary';
+                        inc.type = 'button';
+                        inc.id = 'inc-qty';
+                        inc.textContent = '+';
+
+                        inputGroup.appendChild(dec);
+                        inputGroup.appendChild(qtyInp);
+                        inputGroup.appendChild(inc);
+
+                        var removeBtn = document.createElement('button');
+                        removeBtn.id = 'remove-from-cart-btn';
+                        removeBtn.className = 'btn btn-danger btn-buy';
+                        removeBtn.textContent = 'حذف از سبد خرید';
+                        if(data.item_id) {
+                            removeBtn.setAttribute('data-item-id', data.item_id);
+                            // expose globally for other handlers
+                            cartItemId = String(data.item_id);
+                        }
+
+                        container.appendChild(inputGroup);
+                        container.appendChild(removeBtn);
+
+                        parent.replaceChild(container, addBtn);
+
+                        // attach inc/dec handlers
+                        inc.addEventListener('click', function(){
+                            qtyInp.value = Math.max(1, parseInt(qtyInp.value || '1') + 1);
+                            // trigger change so server is notified
+                            qtyInp.dispatchEvent(new Event('change'));
+                        });
+                        dec.addEventListener('click', function(){
+                            qtyInp.value = Math.max(1, parseInt(qtyInp.value || '1') - 1);
+                            qtyInp.dispatchEvent(new Event('change'));
+                        });
+
+                        // when qty changes, send update to server (reuse update-cart endpoint)
+                        qtyInp.addEventListener('change', function(){
+                            var itemId = removeBtn.getAttribute('data-item-id');
+                            if(!itemId) return;
+                            var body3 = new URLSearchParams();
+                            body3.append('quantity_' + itemId, qtyInp.value);
+                            fetch('{% url "update-cart" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: body3
+                            }).then(r => r.json()).then(d => {
+                                if(d && d.cart_total !== undefined){
+                                    var totalSection = document.querySelector('.total-section');
+                                    if(totalSection) totalSection.innerHTML = 'جمع کل: ' + Number(d.cart_total).toLocaleString() + ' تومان';
+                                }
+                            }).catch(()=>{});
+                        });
+
+                        // remove handler reloads page after server update
+                        removeBtn.addEventListener('click', function(){
+                            var itemId = removeBtn.getAttribute('data-item-id');
+                            var body2 = new URLSearchParams();
+                            if(itemId){
+                                body2.append('quantity_' + itemId, '0');
+                                fetch('{% url "update-cart" %}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': '{{ csrf_token }}'
+                                    },
+                                    body: body2
+                                }).finally(function(){ location.reload(); });
+                            } else {
+                                // fallback: reload
+                                location.reload();
+                            }
+                        });
+                    }
+                } else {
+                    showCartToast();
+                }
+            }).catch(err => {
+                console.error(err);
+            });
+        });
+    }
+
+    // handle explicit remove button if page loaded with product in cart
+    var explicitRemove = document.getElementById('remove-from-cart-btn');
+    if(explicitRemove){
+        explicitRemove.addEventListener('click', function(){
+            var itemId = explicitRemove.getAttribute('data-item-id');
+            var body2 = new URLSearchParams();
+            if(itemId){
+                body2.append('quantity_' + itemId, '0');
+                fetch('{% url "update-cart" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: body2
+                }).finally(function(){ location.reload(); });
+            }
+        });
+    }
+
+    function showCartToast(newQty){
+        var toast = document.getElementById('cart-toast');
+        if(!toast) return;
+        // update message
+        if(newQty !== undefined){
+            var body = toast.querySelector('.toast-body');
+            if(body) body.textContent = 'محصول به سبد خرید شما اضافه شد';
+        }
+        toast.style.display = 'block';
+        // auto hide after 5 seconds
+        var timeout = setTimeout(hideToast, 5000);
+        document.getElementById('close-toast').addEventListener('click', function(){
+            clearTimeout(timeout);
+            hideToast();
+        });
+        function hideToast(){
+            toast.style.display = 'none';
+        }
+    }
+});
+</script>
 
     <!-- نظرات -->
     <section class="comments-section mt-5">
@@ -261,7 +604,7 @@
                     <option value="2">2 ★</option>
                     <option value="1">1 ★</option>
                 </select>
-                <textarea name="text" id="comment-text" class="form-control form-control-sm" rows="1" placeholder="نظر خود را بنویسید..." style="max-width:420px;"></textarea>
+                <textarea name="text" id="comment-text" class="form-control form-control-sm" rows="1" placeholder="نظر خود را بنویسید..." style="min-width:calc(30vw);"></textarea>
                 <button type="submit" id="submit-comment" class="btn btn-success btn-sm">ثبت</button>
             </form>
             {% else %}
