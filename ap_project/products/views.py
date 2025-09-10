@@ -1,3 +1,28 @@
+
+# حذف نظر توسط صاحب نظر
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.shortcuts import redirect
+@require_POST
+def delete_comment(request, pk):
+    if not request.user.is_authenticated:
+        login_url = '/accounts/signin/'
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'login required'}, status=403)
+        return redirect(f"{login_url}?next={request.path}")
+    comment = get_object_or_404(Comment, pk=pk)
+    # فقط صاحب نظر اجازه حذف دارد
+    if hasattr(comment.user, 'id') and comment.user.id == request.user.id:
+        comment.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        messages.success(request, 'نظر شما حذف شد.')
+    else:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'permission denied'}, status=403)
+        messages.error(request, 'شما اجازه حذف این نظر را ندارید.')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 from django.views.generic import DetailView
 from .models import Product, Comment
 from django.views.generic.edit import CreateView
@@ -85,6 +110,7 @@ class AddCommentView(LoginRequiredMixin, CreateView):
     def get_object(self, queryset=None):
         return None  # جلوگیری از تلاش برای پیدا کردن Comment موجود
 
+
     def form_valid(self, form):
         # Attach user and product, then save
         form.instance.user = self.request.user.profile
@@ -93,12 +119,13 @@ class AddCommentView(LoginRequiredMixin, CreateView):
 
         # If request is AJAX, return JSON so frontend can update inline without redirect
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            user_obj = self.object.user.user  # Profile -> User
             return JsonResponse({
-                'user': str(self.object.user),
+                'user': f"{user_obj.first_name} {user_obj.last_name}",
                 'text': self.object.text,
                 'rating': self.object.rating,
                 'created_at': self.object.created_at.strftime('%Y/%m/%d %H:%M')
-            })
+            }, status=200)
 
         return redirect(self.get_success_url())
 

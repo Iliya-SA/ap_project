@@ -602,13 +602,29 @@ document.addEventListener('DOMContentLoaded', function(){
     <section class="comments-section mt-5">
         <h3>نظرات اخیر</h3>
         {% if recent_comments %}
-            {% for comment in recent_comments %}
-            <div class="comment-item">
-                <div class="comment-header">
-                    {{ comment.user }}
-                    <span class="star-icon">★</span>{{ comment.rating }}
+            {% for comment in recent_comments|slice:":5" %}
+            <div class="comment-item position-relative" dir="rtl">
+                {% if user.is_authenticated and comment.user.id == user.id %}
+                    <form method="post" action="{% url 'delete-comment' comment.pk %}" class="delete-comment-form" style="position:absolute; left:12px; top:12px; z-index:2;">
+                    {% csrf_token %}
+                    <!-- برای کاربران بدون JS: دکمه‌ی submit داخل noscript -->
+                    <noscript>
+                        <button type="submit" class="btn btn-sm btn-danger">حذف</button>
+                    </noscript>
+
+                    <!-- دکمه‌ی قابل کلیک توسط JS (type=button مانع submit طبیعی می‌شود) -->
+                    <button type="button"
+                            class="btn btn-sm btn-danger ajax-delete-comment"
+                            data-url="{% url 'delete-comment' comment.pk %}">
+                        حذف
+                    </button>
+                    </form>
+                {% endif %}
+                <div class="d-flex align-items-center mb-2 justify-content-start" style="text-align:right;">
+                    <span class="star-icon ms-2">★ {{ comment.rating }}</span>
+                    <span class="user-name">{{ comment.user.user.first_name }} {{ comment.user.user.last_name }}</span>
                 </div>
-                <p>{{ comment.text }}</p>
+                <div class="comment-text mb-1">{{ comment.text }}</div>
                 <div class="comment-date">{{ comment.created_at|date:"Y/m/d H:i" }}</div>
             </div>
             {% endfor %}
@@ -646,6 +662,57 @@ document.addEventListener('DOMContentLoaded', function(){
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script>
+// AJAX delete via button click — avoids any submit-based handlers so no reload
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('click', async function (ev) {
+    const btn = ev.target.closest && ev.target.closest('.ajax-delete-comment');
+    if (!btn) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation(); // try to stop other click handlers
+
+    if (!confirm('آیا از حذف نظر خود مطمئن هستید؟')) return;
+
+    const url = btn.getAttribute('data-url');
+    // try to find CSRF token from the same form
+    const form = btn.closest('form');
+    const csrfInput = form ? form.querySelector('input[name="csrfmiddlewaretoken"]') : null;
+    const csrf = csrfInput ? csrfInput.value : null;
+
+    // disable button to avoid double clicks
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'در حال حذف...';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          ...(csrf ? {'X-CSRFToken': csrf} : {})
+        }
+      });
+
+      if (!res.ok) {
+        let txt = '';
+        try { txt = await res.text(); } catch(_) {}
+        throw new Error('حذف ناموفق: ' + res.status + ' ' + txt);
+      }
+
+      // حذف DOM کامنت
+      const commentDiv = btn.closest('.comment-item') || btn.closest('.comment') || form.closest('.comment-item') || form;
+      if (commentDiv) commentDiv.remove();
+
+    } catch (err) {
+      console.error('AJAX delete error:', err);
+      alert('حذف نظر ناموفق بود. دوباره تلاش کنید.');
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }, true); // use capture to be early
+});
+</script>
 <script>
 // Enable drag-to-scroll for all .related-row elements (بهبود یافته برای روانی بیشتر و جلوگیری از ناوبری ناخواسته)
 document.addEventListener('DOMContentLoaded', function(){
@@ -742,21 +809,21 @@ document.addEventListener('DOMContentLoaded', function(){
             body: formData
         })
         .then(res => {
-            if(!res.ok) throw new Error('خطا در ارسال نظر');
+            console.log('AJAX response status:', res.status, 'ok:', res.ok);
+            if(!res.ok) {
+                res.text().then(txt => {
+                    console.error('Response not ok. Status:', res.status, 'Body:', txt);
+                });
+                throw new Error('خطا در ارسال نظر');
+            }
             return res.json();
         })
         .then(data => {
-            // prepend new comment to comments section
-            const container = document.querySelector('.comments-section');
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.innerHTML = `<div class="comment-header">${data.user} <span class="star-icon">★</span>${data.rating}</div><p>${data.text}</p><div class="comment-date">${data.created_at}</div>`;
-            container.insertBefore(div, container.querySelector('.d-flex') || container.firstChild);
-            // clear form
-            document.getElementById('comment-text').value = '';
+            console.log('AJAX response data:', data);
+            window.location.reload();
         })
         .catch(err => {
-            console.error(err);
+            console.error('AJAX error:', err);
             alert('ثبت نظر ناموفق بود. دوباره تلاش کنید.');
         });
     });
