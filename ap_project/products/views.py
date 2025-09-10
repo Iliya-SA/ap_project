@@ -1,3 +1,19 @@
+from django.views.decorators.csrf import csrf_exempt
+
+# ثبت بازدید محصول توسط کاربر (AJAX)
+from django.utils import timezone
+def add_visited_product(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    if not profile:
+        return JsonResponse({'error': 'no profile'}, status=400)
+    visited = profile.visited_items or []
+    # اضافه کردن بازدید جدید (بدون حذف قبلی)
+    visit_time = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
+    visited.append({'product_id': pk, 'visit_time': visit_time})
+    # فقط 100 بازدید آخر نگه دار
+    profile.visited_items = visited[-100:]
+    profile.save()
+    return JsonResponse({'success': True})
 
 # حذف نظر توسط صاحب نظر
 from django.views.decorators.http import require_POST

@@ -2,18 +2,88 @@
 
 {% block content %}
 <a href="#" onclick="history.back(); return false;" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:140px; right:32px; z-index:1000;">&larr; بازگشت</a>
-<div class="row justify-content-center">
-  <div class="col-md-8">
-    <h2 class="mb-4 text-center">محصولات بازدیدشده</h2>
-    <ul class="list-unstyled text-center">
-    {% for item in visited_items %}
-        <li class="mb-2">
-          محصول: <a href="{{ item.url }}">{{ item.name }}</a> | زمان بازدید: {{ item.visit_time }}
-        </li>
-      {% empty %}
-        <li>هیچ محصولی بازدید نشده است.</li>
-      {% endfor %}
-    </ul>
+<button id="clear-history-btn" class="btn btn-outline-danger routine-edit-btn" style="position:fixed; top:193px; right:32px; z-index:1000;">حذف تاریخچه بازدید</button>
+<style>
+  .routine-edit-btn.btn-outline-danger:hover {
+    color: #fff !important;
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+  }
+  #visited-list {
+    text-align: right;
+    direction: rtl;
+  }
+</style>
+<div class="row justify-content-end">
+  <h2 class="col-md-9 text-right mb-3">محصولات بازدیدشده</h2>
+  <div class="col-md-9 mt-2">
+  <ul id="visited-list" class="list-unstyled mb-4"></ul>
+    <div id="loading" class="text-center my-3" style="display:none;">
+      <span class="spinner-border"></span>
+      <span>در حال بارگذاری...</span>
+    </div>
+    <div id="no-items" class="text-center text-muted" style="display:none;">هیچ محصولی بازدید نشده است.</div>
   </div>
 </div>
+<script>
+let page = 1;
+let loading = false;
+let hasMore = true;
+const PAGE_SIZE = 30;
+function loadVisited(reset=false) {
+  if (loading || !hasMore) return;
+  loading = true;
+  document.getElementById('loading').style.display = '';
+  fetch(`/visited-items-json/?page=${page}&page_size=${PAGE_SIZE}`)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('visited-list');
+      if (reset) list.innerHTML = '';
+      if (data.items.length === 0 && page === 1) {
+        document.getElementById('no-items').style.display = '';
+      } else {
+        document.getElementById('no-items').style.display = 'none';
+      }
+      data.items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'mb-2';
+        li.innerHTML = `محصول: <a href="${item.url}">${item.name}</a> | زمان بازدید: ${item.visit_time}`;
+        list.appendChild(li);
+      });
+      hasMore = data.has_more;
+      loading = false;
+      document.getElementById('loading').style.display = 'none';
+      if (hasMore) {
+        window.addEventListener('scroll', scrollHandler);
+      } else {
+        window.removeEventListener('scroll', scrollHandler);
+      }
+    });
+}
+function scrollHandler() {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+    page++;
+    loadVisited();
+  }
+}
+document.addEventListener('DOMContentLoaded', function() {
+  loadVisited(true);
+  window.addEventListener('scroll', scrollHandler);
+  const clearBtn = document.getElementById('clear-history-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      if (!confirm('آیا مطمئن هستید که می‌خواهید تاریخچه بازدید را حذف کنید؟')) return;
+      fetch('/clear-visited-items/', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':'{{ csrf_token }}'}})
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('visited-list').innerHTML = '';
+            document.getElementById('no-items').style.display = '';
+            page = 1; hasMore = false;
+          }
+        });
+    });
+  }
+});
+</script>
 {% endblock %}

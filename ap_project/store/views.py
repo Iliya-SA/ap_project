@@ -1,10 +1,40 @@
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
+from django.http import JsonResponse
+from django.shortcuts import render , redirect
+from django.utils import timezone
+from products.models import Product, Comment
+from orders.models import Order
+from django.db.models import Count, Avg, F, FloatField, ExpressionWrapper, Func, Q
+from django.db.models.functions import Coalesce, Ln
+from django.contrib.auth.decorators import login_required
+from context.views import get_persian_season
+from rest_framework.test import APIRequestFactory
+from django.shortcuts import get_object_or_404
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from products.seasonal_vectors import SEASONAL_VECTORS
+from django.db.models import Avg, Count
+
+WORD_MAPPING = {
+    "کزمو": "کرم",
+    "کزم": "کرم",
+    "چرپ": "چرب",
+    "charb": "چرب",
+    "خشك": "خشک",
+    "خشگ": "خشک",
+    "معمولي": "معمولی",
+    "ترکبیی": "ترکیبی",
+    "ابرسان":"آبرسان",
+    "آب رسان":"آبرسان",
+    "آبرسلن":"آبرسان",
+}
+
+def fix_word(word):
+    return WORD_MAPPING.get(word, word)
 
 @require_GET
 def search_products_json(request):
-    from products.models import Product, Comment
-    from django.db.models import Avg, Count
-    from django.db.models.functions import Coalesce
     query = request.GET.get('q', '').strip()
     sort = request.GET.get('sort', 'newest')
     page = int(request.GET.get('page', 1))
@@ -47,11 +77,7 @@ def search_products_json(request):
     return JsonResponse({'products': data, 'has_more': has_more})
 def products_page_view(request):
     return render(request, 'store/all_products.html')
-from django.http import JsonResponse
 def all_products_view(request):
-    from products.models import Product, Comment
-    from django.db.models import Avg, Count
-    from django.db.models.functions import Coalesce
     sort = request.GET.get('sort', 'newest')
     page = int(request.GET.get('page', 1))
     page_size = 16
@@ -84,37 +110,35 @@ def all_products_view(request):
             'avg_rating': float(getattr(p, 'avg_rating', 0.0)),
         })
     return JsonResponse({'products': data, 'has_more': has_more})
-from django.shortcuts import render , redirect
-from django.utils import timezone
-from products.models import Product, Comment
-from orders.models import Order
-from django.http import JsonResponse
-from django.db.models import Count, Avg, F, FloatField, ExpressionWrapper, Func, Q
-from django.db.models.functions import Coalesce, Ln
-from django.contrib.auth.decorators import login_required
-from context.views import get_persian_season
-from django.contrib.auth.decorators import login_required
-from rest_framework.test import APIRequestFactory
-from django.shortcuts import get_object_or_404
-
-
-WORD_MAPPING = {
-    "کزمو": "کرم",
-    "کزم": "کرم",
-    "چرپ": "چرب",
-    "charb": "چرب",
-    "خشك": "خشک",
-    "خشگ": "خشک",
-    "معمولي": "معمولی",
-    "ترکبیی": "ترکیبی",
-    "ابرسان":"آبرسان",
-    "آب رسان":"آبرسان",
-    "آبرسلن":"آبرسان",
-}
-
-def fix_word(word):
-    return WORD_MAPPING.get(word, word)
-
+@login_required
+def visited_items_json(request):
+    profile = getattr(request.user, 'profile', None)
+    visited = profile.visited_items if profile else []
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 30))
+    start = (page - 1) * page_size
+    end = start + page_size
+    items = visited[::-1][start:end]
+    data = []
+    for item in items:
+        product = Product.objects.filter(id=item.get('product_id')).first()
+        if product:
+            data.append({
+                'product_id': product.id,
+                'name': product.name,
+                'visit_time': item.get('visit_time'),
+                'url': f'/products/{product.id}/'
+            })
+    has_more = end < len(visited)
+    return JsonResponse({'items': data, 'has_more': has_more})
+@login_required
+@require_POST
+def clear_visited_items(request):
+    profile = getattr(request.user, 'profile', None)
+    if profile:
+        profile.visited_items = []
+        profile.save()
+    return JsonResponse({'success': True})
 def store_view(request):
     query = request.GET.get('q', '').strip()
     if query:
@@ -405,20 +429,8 @@ def autocomplete_search(request):
 
 @login_required
 def visited_items_view(request):
-    profile = getattr(request.user, 'profile', None)
-    visited = profile.visited_items if profile else []
-    # Get product info for each visited item
-    visited_products = []
-    for item in visited[::-1][:20]:
-        product = Product.objects.filter(id=item.get('product_id')).first()
-        if product:
-            visited_products.append({
-                'product_id': product.id,
-                'name': product.name,
-                'visit_time': item.get('visit_time'),
-                'url': f'/products/{product.id}/'  # Now matches new URL pattern
-            })
-    return render(request, 'store/visited_items.html', {'visited_items': visited_products})
+    # صفحه فقط قالب را رندر می‌کند، داده‌ها با JS و AJAX لود می‌شوند
+    return render(request, 'store/visited_items.html')
 
 @login_required
 def favorites_list_view(request):

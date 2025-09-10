@@ -216,6 +216,22 @@
 <body>
 
 <main class="container my-4">
+{% block extra_scripts %}
+<script>
+// ثبت بازدید محصول به محض لود صفحه (فقط برای کاربران لاگین)
+document.addEventListener('DOMContentLoaded', function() {
+    {% if user.is_authenticated %}
+    fetch('{% url "add-visited-product" product.pk %}', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}
     <!-- نوار بالا با علاقه‌مندی -->
     <nav class="top-navbar">
         <a href="#" onclick="history.back(); return false;">بازگشت</a>

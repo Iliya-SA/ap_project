@@ -83,7 +83,7 @@
                 {% for product in seasonal_products %}
                         <div class="product-card text-center position-relative"
                                  style="min-width:215px; min-height:230px; cursor:pointer; padding-bottom:60px;"
-                                 onclick="window.location.href='{% url 'product-detail' product.pk %}'">
+                                 onclick="window.location.href='{% url 'product-detail' product.pk %}';">
                                 <img src="{{ product.image.url }}" alt="{{ product.name }}" />
                                 <h6 class="mt-2">{{ product.name }}</h6>
                                 <p class="text-success fw-bold mb-1 price-tag">{{ product.price|intcomma }} تومان</p>
