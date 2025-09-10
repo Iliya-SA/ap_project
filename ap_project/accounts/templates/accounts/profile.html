@@ -1,6 +1,8 @@
 {% extends "store/base.html" %}
 {% block title %}پروفایل کاربر{% endblock %}
 {% block content %}
+<!-- back buttons (fixed, outside centered container) -->
+<a href="#" onclick="history.back(); return false;" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:140px; right:32px; z-index:1000;">&larr; بازگشت</a>
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card mt-4">
@@ -20,7 +22,6 @@
                         }
                     </style>
                     <a href="{% url 'signout' %}" class="btn btn-outline-danger">خروج از حساب</a>
-                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">بازگشت به صفحه اصلی</a>
                 </div>
             </div>
         </div>

@@ -218,7 +218,7 @@
 <main class="container my-4">
     <!-- نوار بالا با علاقه‌مندی -->
     <nav class="top-navbar">
-        <a href="{% url 'store' %}">← بازگشت به صفحه اصلی</a>
+        <a href="#" onclick="history.back(); return false;">بازگشت</a>
         {% if user.is_authenticated %}
             <a href="#" id="favorite-btn" class="favorite-link" data-url="{% url 'toggle-favorite' product.pk %}">
                 <span class="heart">{% if is_favorite %}❤️{% else %}🤍{% endif %}</span>

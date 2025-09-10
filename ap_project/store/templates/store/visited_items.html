@@ -1,14 +1,19 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
-  <h2>محصولات بازدیدشده</h2>
-  <ul>
-  {% for item in visited_items %}
-      <li>
-        محصول: <a href="{{ item.url }}">{{ item.name }}</a> | زمان بازدید: {{ item.visit_time }}
-      </li>
-    {% empty %}
-      <li>هیچ محصولی بازدید نشده است.</li>
-    {% endfor %}
-  </ul>
+<a href="#" onclick="history.back(); return false;" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:140px; right:32px; z-index:1000;">&larr; بازگشت</a>
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h2 class="mb-4 text-center">محصولات بازدیدشده</h2>
+    <ul class="list-unstyled text-center">
+    {% for item in visited_items %}
+        <li class="mb-2">
+          محصول: <a href="{{ item.url }}">{{ item.name }}</a> | زمان بازدید: {{ item.visit_time }}
+        </li>
+      {% empty %}
+        <li>هیچ محصولی بازدید نشده است.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}

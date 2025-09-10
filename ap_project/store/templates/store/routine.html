@@ -4,10 +4,10 @@
 
 {% block content %}
 				<!-- back and edit buttons (fixed, outside centered container) -->
-				<a href="{% url 'store' %}" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:120px; right:12px; z-index:1000;">&larr; بازگشت به صفحه اصلی</a>
+				<a href="#" onclick="history.back(); return false;" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:140px; right:32px; z-index:1000;">&larr; بازگشت</a>
 				{% if user.is_authenticated %}
 				  <!-- place edit button slightly below back button to avoid overlap -->
-				  <a href="{% url 'quiz:quiz' %}?next={% url 'routine' %}" class="btn btn-outline-info routine-edit-btn" style="position:fixed; top:170px; right:12px; z-index:1000;">ویرایش آزمون</a>
+				  <a href="{% url 'quiz:quiz' %}?next={% url 'routine' %}" class="btn btn-outline-info routine-edit-btn" style="position:fixed; top:140px; right:140px; z-index:1000;">ویرایش آزمون</a>
 				<style>
 					.routine-edit-btn:hover {
 						color: #fff !important;
