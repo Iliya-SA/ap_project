@@ -142,10 +142,73 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  document.querySelectorAll('.related-row').forEach(function (row) {
+  // باز کردن لینک در تب جدید (اول window.open، سپس fallback با <a>)
+  function openInNewTab(url) {
+    try {
+      const w = window.open(url, '_blank', 'noopener,noreferrer');
+      if (w) return true;
+    } catch (_) {}
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      const ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+      a.dispatchEvent(ev);
+      a.remove();
+      return true;
+    } catch (_) { return false; }
+  }
 
-    const MOVE_THRESHOLD = 8;   // پیکسل حدی که حرکت به عنوان درگ شناخته شود
-    const SUPPRESS_MS = 220;    // مدت زمان سرکوب کلیک بعد از درگ
+  // اضافه کردن handler راست‌کلیک محافظت‌شده به هر کارت
+  function addContextHandlerToCard(card) {
+    if (!card || card._rc_handler_added) return;
+    card._rc_handler_added = true;
+
+    card.addEventListener('contextmenu', function (e) {
+      // بستن منوی پیش‌فرض و جلوگیری از اجرای handlerهای دیگر
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      // اگر کارت غیرفعال است یا ردیف در حالت درگ/سرکوب کلیک است، کاری انجام نده
+      const row = card.closest('.related-row');
+      let isDragging = false, suppressClick = false;
+      if (row && typeof row.__dragState !== 'undefined') {
+        try {
+          isDragging = !!row.__dragState.isDragging;
+          suppressClick = !!row.__dragState.suppressClick;
+        } catch (_) {}
+      }
+      if (isDragging || suppressClick || card.classList.contains('drag-disable')) return;
+
+      // استخراج لینک از data-href یا onclick inline
+      let href = card.getAttribute('data-href') || card.dataset.href;
+      if (!href) {
+        const onclick = card.getAttribute('onclick');
+        if (onclick) {
+          const m = onclick.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+          if (m && m[1]) href = m[1];
+        }
+      }
+      if (!href) return;
+
+      if (card._rc_opened) return;
+      card._rc_opened = true;
+
+      openInNewTab(href);
+
+      setTimeout(() => { card._rc_opened = false; }, 300);
+    }, false);
+  }
+
+  // پیاده‌سازی درگ-اسکرول با pointer events برای هر .related-row
+  document.querySelectorAll('.related-row').forEach(function (row) {
+    const MOVE_THRESHOLD = 8;
+    const SUPPRESS_MS = 220;
 
     let pointerActive = false;
     let activePointerId = null;
@@ -156,39 +219,49 @@ document.addEventListener('DOMContentLoaded', function () {
     let suppressTimer = null;
     let ticking = false;
     let targetScrollLeft = 0;
-    let downTargetCard = null;
 
-    // تصاویر را غیرقابل درگ کن (prevents ghost image)
+    // expose state برای دسترسی handlerهای contextmenu
+    Object.defineProperty(row, '__dragState', {
+      get: function () { return { isDragging: isDragging, suppressClick: suppressClick }; },
+      configurable: true
+    });
+
+    // جلوگیری از ghost image برای تصاویر
     row.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
 
-    // helper: غیرفعال/فعال کردن pointer events برای کارت‌ها هنگام درگ
     function setChildPointerEventsDisabled(disabled) {
-      row.querySelectorAll('.product-card, .related-card').forEach(function(c) {
+      row.querySelectorAll('.product-card, .related-card').forEach(function (c) {
         c.classList.toggle('drag-disable', disabled);
       });
     }
 
-    // یک‌بار: ثبت listener برای هر کارت برای ناوبری تک‌کلیک
-    row.querySelectorAll('.product-card, .related-card').forEach(function(card) {
-      // pointerup امن‌تر است چون با pointer capture کار می‌کند
-      card.addEventListener('pointerup', function(e) {
+    // ثبت listenerها برای کارت‌ها (تک‌کلیک امن و contextmenu)
+    row.querySelectorAll('.product-card, .related-card').forEach(function (card) {
+      // pointerup: فقط وقتی دکمهٔ چپ است یا لمسی
+      card.addEventListener('pointerup', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
         if (isDragging || suppressClick) return;
         const href = card.getAttribute('data-href') || card.dataset.href;
         if (href) window.location.href = href;
       });
 
       // fallback click
-      card.addEventListener('click', function(e) {
+      card.addEventListener('click', function (e) {
         if (isDragging || suppressClick) {
           e.preventDefault();
           e.stopImmediatePropagation();
           return;
         }
+        if (typeof e.button !== 'undefined' && e.button !== 0) return;
         const href = card.getAttribute('data-href') || card.dataset.href;
         if (href) window.location.href = href;
       }, true);
+
+      // handler راست‌کلیک محافظت‌شده
+      addContextHandlerToCard(card);
     });
 
+    // pointerdown — فقط به دکمهٔ چپ واکنش نشان بده (تا راست‌کلیک اختلال ایجاد نکند)
     row.addEventListener('pointerdown', function (e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       pointerActive = true;
@@ -197,23 +270,18 @@ document.addEventListener('DOMContentLoaded', function () {
       startY = e.clientY;
       lastScrollLeft = row.scrollLeft;
       isDragging = false;
-      downTargetCard = e.target && e.target.closest ? e.target.closest('.product-card, .related-card') : null;
-      try { row.setPointerCapture(activePointerId); } catch(_) {}
+      try { row.setPointerCapture(activePointerId); } catch (_) {}
       row.classList.add('dragging');
       document.body.style.userSelect = 'none';
-    }, false);
+    }, { passive: false });
 
-    // pointermove throttled
     row.addEventListener('pointermove', function (e) {
       if (!pointerActive || e.pointerId !== activePointerId) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-
       if (Math.abs(dx) > MOVE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
         isDragging = true;
-        // محاسبه هدف (بدون دستکاری DOM)
         targetScrollLeft = lastScrollLeft - dx * 1.2;
-
         if (!ticking) {
           ticking = true;
           requestAnimationFrame(function () {
@@ -221,15 +289,14 @@ document.addEventListener('DOMContentLoaded', function () {
             ticking = false;
           });
         }
-        // جلوگیری از اسکرول صفحه (فقط وقتی داریم درگ افقی واقعی انجام میدیم)
         e.preventDefault && e.preventDefault();
+        setChildPointerEventsDisabled(true);
       }
     }, { passive: false });
 
-    // خاتمه اشاره‌گر — آزادسازی و تنظیم suppressClick اگر لازم بود
     function finishPointer() {
       if (!pointerActive) return;
-      try { if (activePointerId !== null) row.releasePointerCapture(activePointerId); } catch(_) {}
+      try { if (activePointerId !== null) row.releasePointerCapture(activePointerId); } catch (_) {}
       pointerActive = false;
       activePointerId = null;
       row.classList.remove('dragging');
@@ -238,15 +305,18 @@ document.addEventListener('DOMContentLoaded', function () {
       if (isDragging) {
         suppressClick = true;
         clearTimeout(suppressTimer);
-        suppressTimer = setTimeout(function () {
-          suppressClick = false;
-        }, SUPPRESS_MS);
+        suppressTimer = setTimeout(function () { suppressClick = false; }, SUPPRESS_MS);
       }
       isDragging = false;
     }
 
     row.addEventListener('pointerup', function (e) {
-      // قبل از finish: محاسبهٔ میزان حرکت برای تصمیم‌گیری در مورد کلیک/درگ
+      // اگر موس و دکمه غیر از چپ است فقط cleanup کن
+      if (e.pointerType === 'mouse' && e.button !== 0) {
+        finishPointer();
+        return;
+      }
+
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
       const moved = Math.hypot(dx, dy);
@@ -254,7 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       finishPointer();
 
-      // اگر حرکت کم بوده و کلیک سرکوب نشده، هدفِ زیر نشانگر را ناوبری کن
       if (!wasDragging && moved <= MOVE_THRESHOLD && !suppressClick) {
         const el = document.elementFromPoint(e.clientX, e.clientY);
         const card = el && el.closest ? el.closest('.product-card, .related-card') : null;
@@ -268,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
     row.addEventListener('pointercancel', finishPointer);
     row.addEventListener('pointerleave', finishPointer);
 
-    // اگر کلیک بلافاصله بعد از درگ آمد، آن را سرکوب کنیم
+    // سرکوب کلیک بلافاصله بعد از درگ
     row.addEventListener('click', function (e) {
       if (suppressClick) {
         e.stopImmediatePropagation();
@@ -276,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }, true);
 
-    // پشتیبانی از کیبورد برای دسترسی‌پذیری
+    // دسترسی کیبورد برای کارت‌های فوکوس‌شده
     row.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         const focused = document.activeElement;

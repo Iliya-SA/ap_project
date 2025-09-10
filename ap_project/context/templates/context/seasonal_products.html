@@ -106,4 +106,60 @@
                 {% endfor %}
         </div>
 </section>
+<script>
+// --- تابع باز کردن در تب جدید (الهام از هوم)
+function openInNewTab(url) {
+        try {
+                const w = window.open(url, '_blank', 'noopener,noreferrer');
+                if (w) return true;
+        } catch (err) {}
+        try {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                const ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                a.dispatchEvent(ev);
+                a.remove();
+                return true;
+        } catch (err) { return false; }
+}
+
+// هندلر راست‌کلیک برای کارت محصول
+function addContextHandlerToCard(card) {
+        if (card._rc_handler_added) return;
+        card._rc_handler_added = true;
+        card.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                const href = card.getAttribute('data-href');
+                if (!href) return;
+                if (card._rc_opened) return;
+                card._rc_opened = true;
+                openInNewTab(href);
+                setTimeout(() => { card._rc_opened = false; }, 300);
+                return;
+        }, false);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.seasonal-products-grid .product-card').forEach(function(card) {
+                // اگر کارت با onclick inline دارد، دیتا-اچ‌رف را نیز بگذار تا handler بتواند بخواند
+                if (!card.getAttribute('data-href')) {
+                        const onclick = card.getAttribute('onclick');
+                        if (onclick) {
+                                const m = onclick.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+                                if (m && m[1]) {
+                                        card.setAttribute('data-href', m[1]);
+                                }
+                        }
+                }
+                addContextHandlerToCard(card);
+        });
+});
+</script>
 {% endblock %}

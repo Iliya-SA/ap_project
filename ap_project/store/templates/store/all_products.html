@@ -89,6 +89,45 @@
   </div>
 </div>
 <script>
+// --- تابع باز کردن در تب جدید (الهام از هوم)
+function openInNewTab(url) {
+  try {
+    const w = window.open(url, '_blank', 'noopener,noreferrer');
+    if (w) return true;
+  } catch (err) {}
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    const ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+    a.dispatchEvent(ev);
+    a.remove();
+    return true;
+  } catch (err) { return false; }
+}
+
+// هندلر راست‌کلیک برای کارت محصول (الهام از هوم)
+function addContextHandlerToCard(card) {
+  if (card._rc_handler_added) return;
+  card._rc_handler_added = true;
+  card.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    if (card._rc_opened) return;
+    card._rc_opened = true;
+    openInNewTab(href);
+    setTimeout(() => { card._rc_opened = false; }, 300);
+    return;
+  }, false);
+}
+
 let page = 1;
 let loading = false;
 let sort = 'newest';
@@ -104,6 +143,7 @@ function loadProducts(reset=false) {
       data.products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
+        card.setAttribute('data-href', `/products/${product.id}/`);
         card.onclick = () => window.location.href = `/products/${product.id}/`;
         card.innerHTML = `
           <img src="${product.image_url}" alt="${product.name}" />
@@ -119,6 +159,7 @@ function loadProducts(reset=false) {
             </span>
           </div>
         `;
+        addContextHandlerToCard(card);
         grid.appendChild(card);
       });
       loading = false;
