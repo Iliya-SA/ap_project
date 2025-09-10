@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
+from recommendation.views import RecommendationsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,7 +29,9 @@ urlpatterns = [
     path('cart/', include('cart.urls')),  #سبد خرید
     path('orders/', include('orders.urls')),
     path('context/', include('context.urls')),
-    path('api/routine/', include('routine.urls')),
+    path('routine/', include('routine.urls')),
+    path('quiz/', include('quiz.urls', namespace='quiz')),
+    path('recommendations/<str:username>/', RecommendationsView.as_view(), name='recommendations_user'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
 

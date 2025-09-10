@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'context',
     'routine',
+    'quiz',
+    "recommendation",
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -97,7 +99,8 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# آدرس لاگین را اصلاح کن
+LOGIN_URL = '/accounts/signin/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

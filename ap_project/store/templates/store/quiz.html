@@ -1,0 +1,157 @@
+{% extends "store/base.html" %}
+{% block title %}کوییز روتین پوستی{% endblock %}
+
+{% block content %}
+<div class="card p-4">
+  <!-- back button: moved above the title and right-aligned -->
+  <div class="mb-2 text-end">
+    <a id="quiz-back-btn" href="{{ next|default:'#' }}" class="btn btn-outline-secondary">&larr; بازگشت</a>
+  </div>
+  <h4 class="mb-3">کوییز روتین پوستی</h4>
+  <form method="post" id="quizForm">
+    {% csrf_token %}
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+
+    {% for key, question_text, options in readable_questions %}
+      <div class="mb-3">
+        <label class="form-label">{{ question_text }}</label>
+
+        {% if options %}
+          {% if key in multi_keys %}
+            {% for opt in options %}
+              <div class="form-check form-check-reverse">
+                <input class="form-check-input" type="checkbox" name="{{ key }}[]" value="{{ forloop.counter }}" id="{{ key }}_{{ forloop.counter }}">
+                <label class="form-check-label" for="{{ key }}_{{ forloop.counter }}">{{ opt }}</label>
+              </div>
+            {% endfor %}
+          {% else %}
+            <select class="form-select" name="{{ key }}" required>
+              <option value="">انتخاب کنید</option>
+              {% for opt in options %}
+                <option value="{{ forloop.counter }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
+        {% else %}
+          <textarea class="form-control" name="{{ key }}" rows="2"></textarea>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">ارسال</button>
+  </form>
+</div>
+
+<script>
+// initial values from server (may be empty)
+const initialValues = JSON.parse('{{ initial_json|default:"{}"|escapejs }}');
+
+// helper to set a select by value (value may be index or text)
+function setSelect(name, val){
+  const sel = document.querySelector(`select[name="${name}"]`);
+  if(!sel) return;
+  if(typeof val === 'number'){
+    sel.value = String(val);
+  } else if(typeof val === 'string'){
+    // try to find by option text
+    for(const opt of sel.options){ if(opt.text === val){ sel.value = opt.value; break; } }
+  }
+}
+
+// set checkbox group values (expects array of strings)
+function setCheckboxes(name, vals){
+  if(!Array.isArray(vals)) return;
+  const boxes = document.querySelectorAll(`input[name="${name}[]"]`);
+  boxes.forEach(b => { b.checked = false; });
+  boxes.forEach(b => {
+    const idx = parseInt(b.value, 10) - 1;
+    if(vals.includes(b.nextElementSibling && b.nextElementSibling.innerText ? b.nextElementSibling.innerText.trim() : String(idx))){
+      b.checked = true;
+    }
+  });
+}
+
+// textarea/set simple values
+function setInput(name, val){
+  const el = document.querySelector(`[name="${name}"]`);
+  if(!el) return;
+  el.value = Array.isArray(val) ? val.join(', ') : String(val);
+}
+
+// apply initial values once DOM ready
+document.addEventListener('DOMContentLoaded', function(){
+  for(const key in initialValues){
+    const val = initialValues[key];
+    // multi keys
+    if(Array.isArray(val)){
+      setCheckboxes(key, val);
+    } else if(document.querySelector(`select[name="${key}"]`)){
+      setSelect(key, val);
+    } else {
+      setInput(key, val);
+    }
+  }
+});
+
+// تبدیل multi_keys به آرایه JS
+const multiKeys = JSON.parse('{{ multi_keys|escapejs }}');
+
+document.getElementById('quizForm').addEventListener('submit', function(e) {
+    let valid = true;
+    let firstInvalid = null;
+
+    multiKeys.forEach(key => {
+        const checkboxes = document.querySelectorAll(`input[name="${key}[]"]`);
+        if (checkboxes.length > 0) {
+            const checked = Array.from(checkboxes).some(c => c.checked);
+            if (!checked) {
+                valid = false;
+                if (!firstInvalid) firstInvalid = checkboxes[0];
+            }
+        }
+    });
+
+    if (!valid) {
+        alert("لطفاً همه سوالات چندگزینه‌ای را پاسخ دهید!");
+        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        e.preventDefault();
+    }
+});
+</script>
+
+{% endblock %}
+
+<script>
+// back button: attach handler safely after DOM is ready
+;(function(){
+  function attachBackHandler(){
+    var btn = document.getElementById('quiz-back-btn');
+    if(!btn) return;
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      // prefer explicit next hidden input if present
+      var nextInput = document.querySelector('input[name="next"]');
+      var nextUrl = nextInput ? nextInput.value : null;
+      if(nextUrl){
+        // use replace to avoid adding an extra history entry and to avoid hash-only navigation
+        location.replace(nextUrl);
+        return;
+      }
+      var ref = document.referrer;
+      if(ref && ref.indexOf(location.origin) === 0){
+        window.location.href = ref;
+      } else {
+        history.back();
+      }
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', attachBackHandler);
+  } else {
+    attachBackHandler();
+  }
+})();
+</script>

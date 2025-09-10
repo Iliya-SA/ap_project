@@ -22,12 +22,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from hazm import Normalizer, word_tokenize, Stemmer
 
 # ---------------- تنظیمات و پارامترها ----------------
-PRODUCTS_PATH = "products.json"
-PURCHASES_PATH = "purchases.json"
-SEASON_PATH = "seasonal_vectors.json"
-USER_PREFS_PATH = "user_preferences.json"   # optional
-KEYWORDS_PATH = "keywords.json"            # optional
-OUTPUT_RECS = "recommendations_user_u1.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # مسیر پوشه فعلی اسکریپت
+INPUT_PATH = os.path.join(BASE_DIR, "products.json")
+
+PRODUCTS_PATH = os.path.join(BASE_DIR, "products.json")
+PURCHASES_PATH = os.path.join(BASE_DIR, "purchases.json")
+SEASON_PATH = os.path.join(BASE_DIR, "seasonal_vectors.json")
+USER_PREFS_PATH = os.path.join(BASE_DIR, "user_preferences.json")
+KEYWORDS_PATH = os.path.join(BASE_DIR, "keywords.json")
+OUTPUT_RECS = os.path.join(BASE_DIR, "recommendations_user_u1.json")
 
 SIM_THRESHOLD = 0.4
 KAPPA = 1.0

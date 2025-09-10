@@ -1,7 +1,12 @@
 from django.urls import path
-from .views import quiz_view, my_routine
+from . import views
 
 urlpatterns = [
-    path('quiz/', quiz_view, name='quiz_api'),
-    path('my/', my_routine, name='my_routine'),
+    # API endpoints (minimal)
+    path('quiz/', views.quiz_view, name='quiz_api'),
+    path('my/', views.my_routine, name='my_routine_api'),
+
+    # Web pages
+    path('', views.routine_home, name='routine_home'),
+    path('start/', views.routine_start, name='routine_start'),
 ]

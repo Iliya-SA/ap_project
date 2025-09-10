@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from context.views import get_persian_season
 from django.contrib.auth.decorators import login_required
 from rest_framework.test import APIRequestFactory
+from django.shortcuts import get_object_or_404
 
 
 WORD_MAPPING = {
@@ -110,11 +111,13 @@ def store_view(request):
             ).order_by('-avg_rating')[:10]
 
     # محصولات مورد علاقه: دو بخش جدا
-    liked_favorites = []
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        liked_favorites = list(request.user.profile.favorites.all())
+    else:
+        liked_favorites = []
     recent_purchases = []
 
     if request.user.is_authenticated:
-
         # 5 محصول آخرین خریدهای کاربر
         user_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
         purchased_products = []
@@ -159,8 +162,25 @@ def store_view(request):
     })
     
 def category_view(request, name):
-    # آنوتیت کردن میانگین امتیاز و تعداد نظرات
-    products = Product.objects.filter(category=name).annotate(
+    # جستجو با معادل‌های مختلف (نیم‌فاصله، فاصله، بدون فاصله)
+    alt_names = [name]
+    if '‌' in name:  # نیم‌فاصله
+        alt_names.append(name.replace('‌', ' '))
+        alt_names.append(name.replace('‌', ''))
+    elif ' ' in name:
+        alt_names.append(name.replace(' ', ''))
+        alt_names.append(name.replace(' ', '‌'))
+    else:
+        # اگر هیچ فاصله‌ای نیست، معادل با فاصله و نیم‌فاصله را هم اضافه کن
+        for i in range(1, len(name)):
+            alt_names.append(name[:i] + ' ' + name[i:])
+            alt_names.append(name[:i] + '‌' + name[i:])
+
+    q = Q()
+    for n in set(alt_names):
+        q |= Q(category=n)
+
+    products = Product.objects.filter(q).annotate(
         avg_rating=Avg('comments__rating'),
         comment_count=Count('comments'),
     ).annotate(
@@ -202,7 +222,7 @@ def visited_items_view(request):
 
 @login_required
 def favorites_list_view(request):
-    favorite_product_ids = request.user.favorites.values_list('product_id', flat=True)
+    favorite_product_ids = request.user.profile.favorites.values_list('id', flat=True)
     products = Product.objects.filter(id__in=favorite_product_ids).annotate(
         avg_rating=Coalesce(Avg('comments__rating'), 0.0),
         comment_count=Coalesce(Count('comments'), 0)
@@ -220,23 +240,48 @@ def seasonal_products_view(request):
         'products': products,
         'season': season
     })
+
+
+def full_plan(request):
+    # categories order: پاک کننده, تونر, مرطوب‌کننده, مرطوب‌کننده, ضدآفتاب (sunscreen last)
+    from recommendation.views import build_products_from_db, build_purchases_from_db, get_user_preferences_from_db, compute_recommendations
+    cats = [
+        ('پاک کننده', ['پاک کننده', 'پاک‌کننده']),
+        ('تونر', ['تونر']),
+        ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده']),
+        ('مرطوب‌کننده', ['مرطوب‌کننده', 'مرطوب کننده']),
+        ('ضدآفتاب', ['ضدآفتاب', 'ضد آفتاب'])
+    ]
+    user_id = request.user.username if request.user.is_authenticated else 'u1'
+    products = build_products_from_db(user_id=user_id)
+    purchases = build_purchases_from_db(user_id=user_id)
+    user_prefs, keywords = get_user_preferences_from_db(user_id=user_id)
+    recs = compute_recommendations(products, purchases, user_prefs or {}, keywords or {}, user_id=user_id)
+    scored_products = {r['product_id']: r['final_score'] for r in recs['recommendations']}
+    rows = []
+    for label, queries in cats:
+        q = Q()
+        for cat in queries:
+            q |= Q(category__icontains=cat)
+        prods = Product.objects.filter(q)
+        # Annotate with score, sort, and take top 10
+        prods = [p for p in prods if p.id in scored_products]
+        for p in prods:
+            p.final_score = scored_products.get(p.id, None)
+        prods = sorted(prods, key=lambda p: p.final_score if p.final_score is not None else 0, reverse=True)[:10]
+        rows.append({'category': label, 'products': prods})
+
+    return render(request, 'store/full_plan.html', {
+        'rows': rows,
+        'plan_name': 'طرح کامل'
+    })
 @login_required
-def quiz_page(request):
+def routine(request):
     if request.method == "POST":
-        skin_type = request.POST.get("skin_type")
-        concerns = request.POST.getlist("concerns")  # لیست
-        preferences = request.POST.getlist("preferences")
+        # If POST arrives from some form on the routine page we don't render a separate result page here.
+        # The quiz view handles saving and redirecting back via its 'next' parameter.
+        # Keep the POST handling minimal and redirect back to routine (or caller) to avoid a separate result page.
+        return redirect('routine')
 
-        factory = APIRequestFactory()
-        drf_request = factory.post(
-            "/api/recommendations/",
-            {"skin_type": skin_type, "concerns": concerns, "preferences": preferences},
-            format="json"
-        )
-        drf_request.user = request.user
-
-        return render(request, "store/quiz_result.html", {
-            "recommendations": []
-        })
-
-    return render(request, "store/quiz_page.html")
+    # GET -> render the routine selection page
+    return render(request, "store/routine.html")

@@ -7,6 +7,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
 class ProductDetailView(DetailView):
@@ -45,6 +47,9 @@ class ProductDetailView(DetailView):
         else:
             context['is_favorite'] = False
 
+        skin_type_str = str(product.skin_type).replace('[','').replace(']','').replace("'", "")
+        context['skin_type_str'] = skin_type_str
+
         return context
 
 
@@ -78,15 +83,22 @@ class AddCommentView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('product-detail', kwargs={'pk': self.kwargs['pk']})
 
+
 @login_required
+@require_POST
 def toggle_favorite(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     profile = getattr(request.user, 'profile', None)
+    is_favorite = False
     if profile:
         if profile.favorites.filter(id=product.id).exists():
             profile.favorites.remove(product)
+            is_favorite = False
         else:
             profile.favorites.add(product)
+            is_favorite = True
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'is_favorite': is_favorite})
     return redirect(request.META.get('HTTP_REFERER', 'store'))
 
 

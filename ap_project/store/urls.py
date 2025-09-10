@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     store_view, visited_items_view, contact_feedback_view,
-    favorites_list_view, seasonal_products_view, quiz_page
+    favorites_list_view, seasonal_products_view, routine
 )
 from . import views
 
@@ -14,5 +14,6 @@ urlpatterns = [
     path('favorites/', favorites_list_view, name='favorites-list'),
     path('seasonal-products/', seasonal_products_view, name='seasonal-products'),
     path('visited-items/', visited_items_view, name='visited-items'),
-    path("routine/quiz/", quiz_page, name="quiz_page"),
+    path("routine/", routine, name="routine"),
+    path("routine/full-plan/", views.full_plan, name="full_plan"),
 ]

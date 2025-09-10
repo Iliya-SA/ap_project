@@ -1,0 +1,142 @@
+{% extends 'store/base.html' %}
+{% load humanize %}
+{% block title %}طرح کامل - روتین پوستی{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
+    <a href="{% url 'routine' %}" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
+  </div>
+
+  <h2 class="mb-4">{{ plan_name }}</h2>
+
+  {% for row in rows %}
+    <section class="mb-5">
+      <h5 class="mb-2">{{ row.category }}</h5>
+      {% if row.category == 'پاک کننده' %}
+        <p class="text-muted">برای شروع یک روتین پوستی سالم، همیشه با پاک‌کننده آغاز کنید! صبح و شب صورت خود را با یک فوم یا ژل ملایم بشویید تا آلودگی، چربی و آرایش از پوستتان پاک شود. آب ولرم بهترین انتخاب است و بعد از شست‌وشو، پوست را با حوله تمیز به آرامی خشک کنید. این مرحله کمک می‌کند محصولات بعدی بهتر جذب شوند و پوستتان همیشه شاداب بماند.</p>
+      {% elif row.category == 'تونر' %}
+        <p class="text-muted">بعد از پاکسازی، تونر را فراموش نکنید! تونر به بازگرداندن تعادل pH پوست کمک می‌کند و منافذ را برای جذب بهتر سرم و مرطوب‌کننده آماده می‌سازد. مقدار کمی تونر را روی پنبه یا کف دست بریزید و به آرامی روی صورت بزنید. صبح و شب بعد از شست‌وشو استفاده شود تا پوستتان همیشه تازه و آماده باشد.</p>
+      {% elif row.category == 'مرطوب‌کننده' %}
+        <p class="text-muted">مرطوب‌کننده دوست همیشگی پوست شماست! بعد از تونر و سرم، مقدار کافی مرطوب‌کننده را روی صورت و گردن بزنید و به آرامی ماساژ دهید تا جذب شود. این کار را صبح و شب انجام دهید تا پوستتان نرم، لطیف و درخشان بماند. اگر پوست خیلی خشکی دارید، در طول روز هم می‌توانید تمدید کنید.</p>
+      {% elif row.category == 'ضدآفتاب' %}
+        <p class="text-muted">ضدآفتاب مهم‌ترین بخش روتین روزانه است! هر روز صبح، حتی در روزهای ابری یا داخل خانه، مقدار کافی ضدآفتاب را به کل صورت و گردن بزنید. ۳۰ دقیقه قبل از خروج از منزل استفاده کنید و اگر مدت طولانی بیرون هستید یا عرق کردید، هر ۲ تا ۳ ساعت تمدید کنید. با این کار از پوستتان در برابر پیری زودرس و آسیب‌های آفتاب محافظت می‌کنید.</p>
+      {% else %}
+        <p class="text-muted">استفادهٔ روزانه متناسب با نیاز (مثلاً کرم روز/شب)؛ معمولاً بعد از سرم و مرطوب‌کننده اعمال می‌شود.</p>
+      {% endif %}
+
+      <div class="related-row d-flex overflow-auto gap-3 py-2">
+        {% for product in row.products %}
+          <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+            <h6 class="mt-2">{{ product.name }}</h6>
+            <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
+            {# <p class="text-muted small mb-1">امتیاز: {{ product.final_score|default:'-' }}</p> #}
+            <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</div>
+        <style>
+        .related-row, .related-row * {
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -ms-user-select: none !important;
+        }
+        </style>
+        <script>
+        // Enable drag-to-scroll for all .related-row elements, and prevent selection while dragging
+        document.addEventListener('DOMContentLoaded', function(){
+          document.querySelectorAll('.related-row').forEach(function(row){
+            let isDown = false, startX, scrollLeft;
+            row.addEventListener('mousedown', function(e){
+              isDown = true;
+              row.classList.add('dragging');
+              startX = e.pageX - row.offsetLeft;
+              scrollLeft = row.scrollLeft;
+              document.body.style.userSelect = 'none';
+            });
+            row.addEventListener('mouseleave', function(){
+              isDown = false;
+              row.classList.remove('dragging');
+              document.body.style.userSelect = '';
+            });
+            row.addEventListener('mouseup', function(){
+              isDown = false;
+              row.classList.remove('dragging');
+              document.body.style.userSelect = '';
+            });
+            row.addEventListener('mousemove', function(e){
+              if(!isDown) return;
+              e.preventDefault();
+              const x = e.pageX - row.offsetLeft;
+              const walk = (x - startX) * 1.2; // scroll speed
+              row.scrollLeft = scrollLeft - walk;
+            });
+            // Touch support
+            row.addEventListener('touchstart', function(e){
+              isDown = true;
+              startX = e.touches[0].pageX - row.offsetLeft;
+              scrollLeft = row.scrollLeft;
+              document.body.style.userSelect = 'none';
+            });
+            row.addEventListener('touchend', function(){
+              isDown = false;
+              document.body.style.userSelect = '';
+            });
+            row.addEventListener('touchmove', function(e){
+              if(!isDown) return;
+              const x = e.touches[0].pageX - row.offsetLeft;
+              const walk = (x - startX) * 1.2;
+              row.scrollLeft = scrollLeft - walk;
+            });
+          });
+        });
+        </script>
+      <script>
+      // Enable drag-to-scroll for all .related-row elements
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.related-row').forEach(function(row){
+          let isDown = false, startX, scrollLeft;
+          row.addEventListener('mousedown', function(e){
+            isDown = true;
+            row.classList.add('dragging');
+            startX = e.pageX - row.offsetLeft;
+            scrollLeft = row.scrollLeft;
+          });
+          row.addEventListener('mouseleave', function(){
+            isDown = false;
+            row.classList.remove('dragging');
+          });
+          row.addEventListener('mouseup', function(){
+            isDown = false;
+            row.classList.remove('dragging');
+          });
+          row.addEventListener('mousemove', function(e){
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - row.offsetLeft;
+            const walk = (x - startX) * 1.2; // scroll speed
+            row.scrollLeft = scrollLeft - walk;
+          });
+          // Touch support
+          row.addEventListener('touchstart', function(e){
+            isDown = true;
+            startX = e.touches[0].pageX - row.offsetLeft;
+            scrollLeft = row.scrollLeft;
+          });
+          row.addEventListener('touchend', function(){
+            isDown = false;
+          });
+          row.addEventListener('touchmove', function(e){
+            if(!isDown) return;
+            const x = e.touches[0].pageX - row.offsetLeft;
+            const walk = (x - startX) * 1.2;
+            row.scrollLeft = scrollLeft - walk;
+          });
+        });
+      });
+      </script>
+{% endblock %}

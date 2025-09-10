@@ -53,12 +53,23 @@
             position: absolute;
             right: 0;
             top: 100%;
-            background-color: #fff;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            /* force fully opaque white background */
+            background-color: #ffffff !important;
+            background: rgba(255,255,255,1) !important;
+            opacity: 1 !important; /* ensure dropdown is fully opaque */
+            /* remove any glass/backdrop effects that might show background */
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            filter: none !important;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15) !important;
             border-radius: 6px;
             padding: 10px 15px;
             min-width: 140px;
-            z-index: 1000;
+            z-index: 1050;
+        }
+        /* back button used on some pages (routine) should stay under dropdowns */
+        .routine-back-btn {
+            z-index: 1000 !important;
         }
         .dropdown-menu a {
             display: block;
@@ -129,7 +140,7 @@
 
         {% if user.is_authenticated %}
             <a href="{% url 'profile' %}" class="btn btn-outline-primary">پروفایل من</a>
-            <a href="{% url 'quiz_page' %}" class="btn btn-outline-success">روتین پوستی</a>
+            <a href="{% url 'routine' %}" class="btn btn-outline-success">روتین پوستی</a>
         {% else %}
             <a href="{% url 'signin' %}" class="btn btn-outline-success">ورود</a>
             <a href="{% url 'signup' %}" class="btn btn-outline-primary">ثبت‌نام</a>
@@ -141,7 +152,7 @@
     <div class="dropdown-menu-container">
         <span class="category-title">دسته بندی ▼</span>
         <div class="dropdown-menu">
-            <a href="{% url 'category' 'آبرسان' %}">آبرسان</a>
+            <a href="{% url 'category' 'مرطوب‌کننده' %}">مرطوب‌کننده</a>
             <a href="{% url 'category' 'ضدآفتاب' %}">ضدآفتاب</a>
             <a href="{% url 'category' 'ضدچروک' %}">ضدچروک</a>
             <a href="{% url 'category' 'روشن‌کننده' %}">روشن‌کننده</a>

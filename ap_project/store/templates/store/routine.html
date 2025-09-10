@@ -1,0 +1,43 @@
+{% extends 'store/base.html' %}
+
+{% block title %}انتخاب طرح روتین{% endblock %}
+
+{% block content %}
+				<!-- back and edit buttons (fixed, outside centered container) -->
+				<a href="{% url 'store' %}" class="btn btn-outline-secondary routine-back-btn" style="position:fixed; top:120px; right:12px; z-index:1000;">&larr; بازگشت به صفحه اصلی</a>
+				{% if user.is_authenticated %}
+				  <!-- place edit button slightly below back button to avoid overlap -->
+				  <a href="{% url 'quiz:quiz' %}?next={% url 'routine' %}" class="btn btn-outline-info routine-edit-btn" style="position:fixed; top:170px; right:12px; z-index:1000;">ویرایش آزمون</a>
+				<style>
+					.routine-edit-btn:hover {
+						color: #fff !important;
+					}
+				</style>
+				{% endif %}
+
+				<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 220px);">
+					<div class="mx-auto" style="max-width:640px; text-align:center;">
+					{% if user.is_authenticated and user.profile.user_preferences and user.profile.user_preferences|length > 0 %}
+						<h1 class="mb-4">طرح مورد نظر خود را انتخاب کنید</h1>
+
+						<div class="d-grid gap-3" style="grid-template-columns: 1fr;">
+							<a href="{% url 'full_plan' %}" class="btn btn-primary btn-lg w-100 py-3">طرح کامل</a>
+
+							<form method="post" class="w-100">{% csrf_token %}
+								<input type="hidden" name="plan" value="Hydration Plan">
+								<button class="btn btn-success btn-lg w-100 py-3" type="submit">طرح آبرسانی</button>
+							</form>
+
+							<form method="post" class="w-100">{% csrf_token %}
+								<input type="hidden" name="plan" value="Minimalist Plan">
+								<button class="btn btn-secondary btn-lg w-100 py-3" type="submit">طرح مینیمالیستی</button>
+							</form>
+						</div>
+					{% else %}
+						<h1 class="mb-4">هنوز آزمون روتین پوستی را نداده‌اید؟</h1>
+						<p class="mb-4">برای دریافت پیشنهاد روتین، لطفاً آزمون را کامل کنید.</p>
+						<a href="{% url 'quiz:quiz' %}" class="btn btn-primary btn-lg w-50">شروع آزمون</a>
+					{% endif %}
+				</div>
+			</div>
+{% endblock %}

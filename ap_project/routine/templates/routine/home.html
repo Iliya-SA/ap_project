@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>انتخاب طرح روتین</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; direction: rtl; background: #fff; color: #222; }
+    .container { max-width: 640px; margin: 80px auto; text-align: center; }
+    h1 { margin-bottom: 24px; }
+    .btn-row { display:flex; gap:12px; justify-content: center; margin-top: 20px; }
+    .btn { background:#007bff; color:#fff; padding:14px 22px; border-radius:8px; border:none; cursor:pointer; font-size:16px; }
+    .btn.secondary { background:#28a745 }
+    .btn.tertiary { background:#6c757d }
+    form { display:inline-block }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>طرح مورد نظر خود را انتخاب کنید</h1>
+
+    <div class="btn-row">
+      <form method="post" action="start/">{% csrf_token %}
+        <input type="hidden" name="plan" value="Full Plan">
+        <button class="btn" type="submit">طرح کامل</button>
+      </form>
+
+      <form method="post" action="start/">{% csrf_token %}
+        <input type="hidden" name="plan" value="Hydration Plan">
+        <button class="btn secondary" type="submit">طرح آبرسانی</button>
+      </form>
+
+      <form method="post" action="start/">{% csrf_token %}
+        <input type="hidden" name="plan" value="Minimalist Plan">
+        <button class="btn tertiary" type="submit">طرح مینیمالیستی</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
