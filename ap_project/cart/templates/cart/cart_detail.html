@@ -70,6 +70,14 @@
             height: auto;
             border-radius: 6px;
         }
+        .cart-item.product-clickable {
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+        .cart-item.product-clickable:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            background: #f5f8ff;
+        }
         .cart-item-details {
             flex-grow: 1;
         }
@@ -114,7 +122,7 @@
         <form id="update-cart-form" method="POST" action="{% url 'update-cart' %}">
             {% csrf_token %}
             {% for item in cart.items.all %}
-                <div class="cart-item" data-item-id="{{ item.id }}">
+                <div class="cart-item product-clickable" data-item-id="{{ item.id }}" data-href="{% url 'product-detail' item.product.pk %}">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                     <div class="cart-item-details">
                         <h5>{{ item.product.name }}</h5>
@@ -158,16 +166,82 @@
 
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 <script>
+// قابلیت کلیک و راست‌کلیک روی کارت محصول سبد خرید
+function openInNewTab(url) {
+    try {
+        const w = window.open(url, '_blank', 'noopener,noreferrer');
+        if (w) return true;
+    } catch (err) {}
+    try {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        const ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+        a.dispatchEvent(ev);
+        a.remove();
+        return true;
+    } catch (err) { return false; }
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+        // کلیک و راست‌کلیک روی کارت محصول سبد خرید
+        document.querySelectorAll('.cart-item.product-clickable').forEach(function(card){
+                card.addEventListener('click', function(e){
+                        // اگر روی input یا دکمه حذف کلیک شد، نپریم
+                        if(e.target.closest('.cart-item-quantity')) return;
+                        const href = card.getAttribute('data-href');
+                        if(href) window.location.href = href;
+                });
+                card.addEventListener('contextmenu', function(e){
+                        // اگر روی input یا دکمه حذف راست‌کلیک شد، نپریم
+                        if(e.target.closest('.cart-item-quantity')) return;
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                        const href = card.getAttribute('data-href');
+                        if(href) openInNewTab(href);
+                });
+        });
+    // حذف آیتم با AJAX
     document.querySelectorAll('.remove-item-btn').forEach(function(btn){
-        btn.addEventListener('click', function(){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation(); // جلوگیری از کلیک روی کارت
             var itemId = btn.getAttribute('data-item-id');
             var qtyInput = document.getElementById('quantity_' + itemId);
             if (qtyInput) {
-                qtyInput.value = 0; // update-cart view treats 0 as delete
-                // submit the update form
-                var form = document.getElementById('update-cart-form');
-                if (form) form.submit();
+                // AJAX حذف
+                var formData = new URLSearchParams();
+                formData.append(qtyInput.name, 0);
+                fetch('{% url "update-cart" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                }).then(res => res.json())
+                .then(data => {
+                    // حذف آیتم از DOM
+                    var row = document.querySelector('.cart-item[data-item-id="'+itemId+'"]');
+                    if(row) row.remove();
+                    // به‌روزرسانی جمع کل
+                    if(data && data.cart_total !== undefined){
+                        var totalSection = document.querySelector('.total-section');
+                        if(totalSection) totalSection.innerHTML = 'جمع کل: ' + Number(data.cart_total).toLocaleString() + ' تومان';
+                    }
+                    // اگر هیچ آیتمی نماند، پیام خالی بودن سبد را نشان بده
+                    if(document.querySelectorAll('.cart-item').length === 0){
+                        var container = document.querySelector('.container.mt-4');
+                        if(container){
+                            container.innerHTML = '<div class="alert alert-info mt-4">سبد خرید شما خالی است.</div>' +
+                                '<a href="{% url 'order-history' %}" class="btn btn-outline-secondary btn-complete mt-3">مشاهده تاریخچه سفارش ها</a>';
+                        }
+                    }
+                });
             }
         });
     });
@@ -175,10 +249,10 @@ document.addEventListener('DOMContentLoaded', function(){
     // auto update when quantity changes
     document.querySelectorAll('.quantity-input').forEach(function(inp){
         inp.addEventListener('change', function(){
-            var val = parseInt(inp.value) || 0;
+            var val = parseInt(inp.value) || 1;
             if(val < 1){
-                // treat as delete
-                inp.value = 0;
+                inp.value = 1;
+                val = 1;
             }
             var itemId = inp.id.split('_')[1];
             // update line total immediately on client
@@ -186,14 +260,14 @@ document.addEventListener('DOMContentLoaded', function(){
             if(row){
                 var priceSpan = row.querySelector('.product-price');
                 var price = parseFloat(priceSpan.getAttribute('data-price')) || 0;
-                var totalAmt = price * (parseInt(inp.value) || 0);
+                var totalAmt = price * val;
                 var totalSpan = row.querySelector('.item-total-amount');
                 if(totalSpan) totalSpan.textContent = Math.round(totalAmt).toLocaleString();
             }
 
             // send AJAX to update server
             var formData = new URLSearchParams();
-            formData.append(inp.name, inp.value);
+            formData.append(inp.name, val);
 
             fetch('{% url "update-cart" %}', {
                 method: 'POST',
