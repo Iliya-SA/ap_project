@@ -7,6 +7,7 @@ cd ap_project
 python manage.py makemigrations
 python manage.py migrate
 python manage.py import_json_data
+python manage.py populate_seasonal_keywords
 
 needs reconnect in my sql
 

@@ -1,12 +1,13 @@
+{% extends 'store/base.html' %}
 {% load humanize %}
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ product.name }} - فروشگاه لوازم آرایشی</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+{% block title %}{{ product.name }} - فروشگاه لوازم آرایشی{% endblock %}
+{% block content %}
     <style>
+            .related-row, .related-row * {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                -ms-user-select: none !important;
+            }
         body {
             background-color: #f9fafb;
             font-family: "Vazir", sans-serif;
@@ -126,19 +127,33 @@
 </head>
 <body>
 
-<div class="container my-4">
-
+<main class="container my-4">
     <!-- نوار بالا با علاقه‌مندی -->
     <nav class="top-navbar">
         <a href="{% url 'store' %}">← بازگشت به صفحه اصلی</a>
-        <a href="{% url 'toggle-favorite' product.pk %}" class="favorite-link">
-            {% if is_favorite %}
-                <span class="heart">❤️</span>
-            {% else %}
-                <span class="heart">🤍</span>
-            {% endif %}
+        <a href="#" id="favorite-btn" class="favorite-link" data-url="{% url 'toggle-favorite' product.pk %}">
+            <span class="heart">{% if is_favorite %}❤️{% else %}🤍{% endif %}</span>
             علاقه‌مندی
         </a>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var favBtn = document.getElementById('favorite-btn');
+            favBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch(favBtn.getAttribute('data-url'), {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    favBtn.querySelector('.heart').textContent = data.is_favorite ? '❤️' : '🤍';
+                });
+            });
+        });
+        </script>
     </nav>
 
     <!-- بخش محصول -->
@@ -158,7 +173,7 @@
                 <h5 class="text-muted">{{ product.brand }}</h5>
                 <p><strong>دسته‌بندی:</strong> {{ product.category }}</p>
                 <p>{{ product.description }}</p>
-                <p><strong>مناسب برای پوست‌های:</strong> {{ product.skin_type }}</p>
+                <p><strong>مناسب برای پوست‌های:</strong> {{ skin_type_str }}</p>
 
                 <div class="my-3 fs-5">
                     <span class="star-icon">★</span>
@@ -171,18 +186,17 @@
         </div>
     </div>
 
+
     <!-- محصولات مرتبط -->
     <section class="mt-5">
-        <h3 class="mb-4">محصولات مرتبط</h3>
-        <div class="row row-cols-2 row-cols-md-5 g-3">
+        <h4 class="mb-3" style="font-weight:600;">محصولات مرتبط</h4>
+        <div class="related-row d-flex overflow-auto gap-3 py-2">
             {% for related in related_products %}
-            <div class="col">
-                <div class="related-card text-center p-2">
-                    <img src="{{ related.image.url }}" alt="{{ related.name }}">
-                    <h6 class="mt-2">{{ related.name }}</h6>
-                    <p class="text-success fw-bold">{{ related.price|floatformat:0|intcomma }} تومان</p>
-                    <a href="{% url 'product-detail' related.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
-                </div>
+            <div class="product-card related-card flex-shrink-0 text-center p-2" style="min-width:210px; width:210px;">
+                <img src="{{ related.image.url }}" alt="{{ related.name }}">
+                <h6 class="mt-2">{{ related.name }}</h6>
+                <p class="text-success fw-bold mb-1">{{ related.price|floatformat:0|intcomma }} تومان</p>
+                <a href="{% url 'product-detail' related.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
             </div>
             {% empty %}
             <p class="text-muted">محصول مرتبطی وجود ندارد.</p>
@@ -192,16 +206,14 @@
 
     <!-- دیگر محصولات برند -->
     <section class="mt-5">
-        <h3 class="mb-4">دیگر محصولات برند {{ product.brand }}</h3>
-        <div class="row row-cols-2 row-cols-md-5 g-3">
+        <h4 class="mb-3" style="font-weight:600;">دیگر محصولات برند {{ product.brand }}</h4>
+        <div class="related-row d-flex overflow-auto gap-3 py-2">
             {% for brand_item in brand_products %}
-            <div class="col">
-                <div class="related-card text-center p-2">
-                    <img src="{{ brand_item.image.url }}" alt="{{ brand_item.name }}">
-                    <h6 class="mt-2">{{ brand_item.name }}</h6>
-                    <p class="text-success fw-bold">{{ brand_item.price|floatformat:0|intcomma }} تومان</p>
-                    <a href="{% url 'product-detail' brand_item.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
-                </div>
+            <div class="product-card related-card flex-shrink-0 text-center p-2" style="min-width:210px; width:210px;">
+                <img src="{{ brand_item.image.url }}" alt="{{ brand_item.name }}">
+                <h6 class="mt-2">{{ brand_item.name }}</h6>
+                <p class="text-success fw-bold mb-1">{{ brand_item.price|floatformat:0|intcomma }} تومان</p>
+                <a href="{% url 'product-detail' brand_item.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
             </div>
             {% empty %}
             <p class="text-muted">محصول دیگری از این برند وجود ندارد.</p>
@@ -233,8 +245,53 @@
         </div>
     </section>
 
-</div>
+
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+<script>
+// Enable drag-to-scroll for all .related-row elements
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.related-row').forEach(function(row){
+        let isDown = false, startX, scrollLeft;
+        row.addEventListener('mousedown', function(e){
+            isDown = true;
+            row.classList.add('dragging');
+            startX = e.pageX - row.offsetLeft;
+            scrollLeft = row.scrollLeft;
+        });
+        row.addEventListener('mouseleave', function(){
+            isDown = false;
+            row.classList.remove('dragging');
+        });
+        row.addEventListener('mouseup', function(){
+            isDown = false;
+            row.classList.remove('dragging');
+        });
+        row.addEventListener('mousemove', function(e){
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - row.offsetLeft;
+            const walk = (x - startX) * 1.2; // scroll speed
+            row.scrollLeft = scrollLeft - walk;
+        });
+        // Touch support
+        row.addEventListener('touchstart', function(e){
+            isDown = true;
+            startX = e.touches[0].pageX - row.offsetLeft;
+            scrollLeft = row.scrollLeft;
+        });
+        row.addEventListener('touchend', function(){
+            isDown = false;
+        });
+        row.addEventListener('touchmove', function(e){
+            if(!isDown) return;
+            const x = e.touches[0].pageX - row.offsetLeft;
+            const walk = (x - startX) * 1.2;
+            row.scrollLeft = scrollLeft - walk;
+        });
+    });
+});
+</script>
+{% endblock %}
