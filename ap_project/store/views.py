@@ -1,3 +1,50 @@
+from django.views.decorators.http import require_GET
+
+@require_GET
+def search_products_json(request):
+    from products.models import Product, Comment
+    from django.db.models import Avg, Count
+    from django.db.models.functions import Coalesce
+    query = request.GET.get('q', '').strip()
+    sort = request.GET.get('sort', 'newest')
+    page = int(request.GET.get('page', 1))
+    page_size = 16
+    qs = Product.objects.annotate(
+        avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+        comment_count=Coalesce(Count('comments'), 0)
+    )
+    if query:
+        qs = qs.filter(
+            Q(name__icontains=query) |
+            Q(category__icontains=query) |
+            Q(tags__icontains=query) |
+            Q(skin_type__icontains=query)
+        )
+    if sort == 'newest':
+        qs = qs.order_by('-created_at')
+    elif sort == 'cheapest':
+        qs = qs.order_by('price')
+    elif sort == 'expensive':
+        qs = qs.order_by('-price')
+    elif sort == 'alpha_asc':
+        qs = qs.order_by('name')
+    elif sort == 'alpha_desc':
+        qs = qs.order_by('-name')
+    start = (page - 1) * page_size
+    end = start + page_size
+    products = qs[start:end]
+    has_more = qs.count() > end
+    data = []
+    for p in products:
+        data.append({
+            'id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'image_url': p.image.url if p.image else '',
+            'stock': p.stock,
+            'avg_rating': float(getattr(p, 'avg_rating', 0.0)),
+        })
+    return JsonResponse({'products': data, 'has_more': has_more})
 def products_page_view(request):
     return render(request, 'store/all_products.html')
 from django.http import JsonResponse
@@ -298,16 +345,42 @@ def category_view(request, name):
     for n in set(alt_names):
         q |= Q(category=n)
 
-    products = Product.objects.filter(q).annotate(
-        avg_rating=Avg('comments__rating'),
-        comment_count=Count('comments'),
-    ).annotate(
-        score=ExpressionWrapper(
-            F('avg_rating') * Func(F('comment_count') + 1, function='LOG'),
-            output_field=FloatField()
-        )
-    ).order_by('-score')[:20]
-
+    # Infinite scroll and sorting support
+    sort = request.GET.get('sort', 'newest')
+    page = int(request.GET.get('page', 1))
+    page_size = 16
+    qs = Product.objects.filter(q).annotate(
+        avg_rating=Coalesce(Avg('comments__rating'), 0.0),
+        comment_count=Coalesce(Count('comments'), 0)
+    )
+    if sort == 'newest':
+        qs = qs.order_by('-created_at')
+    elif sort == 'cheapest':
+        qs = qs.order_by('price')
+    elif sort == 'expensive':
+        qs = qs.order_by('-price')
+    elif sort == 'alpha_asc':
+        qs = qs.order_by('name')
+    elif sort == 'alpha_desc':
+        qs = qs.order_by('-name')
+    else:
+        qs = qs.order_by('-created_at')
+    start = (page - 1) * page_size
+    end = start + page_size
+    products = qs[start:end]
+    has_more = qs.count() > end
+    if request.GET.get('json') == '1':
+        data = []
+        for p in products:
+            data.append({
+                'id': p.id,
+                'name': p.name,
+                'price': p.price,
+                'image_url': p.image.url if p.image else '',
+                'stock': p.stock,
+                'avg_rating': float(getattr(p, 'avg_rating', 0.0)),
+            })
+        return JsonResponse({'products': data, 'has_more': has_more})
     return render(request, 'store/category.html', {
         'products': products,
         'category': name,

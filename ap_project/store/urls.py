@@ -21,4 +21,5 @@ urlpatterns = [
     path("routine/minimal-plan/", views.minimal_plan, name="minimal_plan"),
     path('products/', products_page_view, name='products-page'),
     path('products/all/', all_products_view, name='all-products'),
+    path('search/', views.search_products_json, name='search-products-json'),
 ]

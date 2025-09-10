@@ -5,7 +5,55 @@
     <meta charset="UTF-8" />
     <title>{% block title %}فروشگاه لوازم آرایشی{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'font-awsome/6.7.2/css/all.min.css' %}" />
     <style>
+        /* دکمه ضربدر به صورت پیش‌فرض نامرئی است */
+        #clear-search-btn {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s;
+        }
+        #clear-search-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* حذف ضربدر آبی پیش‌فرض مرورگر از input[type=search] */
+        input[type="search"]::-webkit-search-clear-button {
+            display: none;
+        }
+        input[type="search"]::-ms-clear {
+            display: none;
+        }
+        input[type="search"]::-o-clear {
+            display: none;
+        }
+        input[type="search"]::-moz-clear {
+            display: none;
+        }
+        /* انیمیشن آیکون ضربدر (حذف) در نوار جست‌وجو */
+        .search-group-custom .btn .fa-times {
+            transition: transform 0.22s cubic-bezier(.4,1.6,.6,1), color 0.18s;
+        }
+        .search-group-custom .btn:hover .fa-times,
+        .search-group-custom .btn:focus .fa-times {
+            transform: scale(1.25) rotate(-12deg);
+            color: #dc3545;
+        }
+        /* انیمیشن ذره‌بین هنگام هاور روی دکمه جست‌وجو */
+        .search-group-custom .btn .fa-search {
+            transition: transform 0.22s cubic-bezier(.4,1.6,.6,1), color 0.18s;
+        }
+        .search-group-custom .btn:hover .fa-search,
+        .search-group-custom .btn:focus .fa-search {
+            transform: scale(1.25) rotate(-12deg);
+            color: #0d6efd;
+        }
+        /* کاهش فاصله دکمه‌های سرچ و ضربدر */
+        .search-group-custom .btn {
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
         body { direction: rtl; text-align: right; background-color: #f9f9f9; }
         .product-card {
             border: 1px solid #ddd;
@@ -129,14 +177,30 @@
 
 <header class="header-bar d-flex justify-content-between align-items-center">
     <div><h4><a href="{% url 'home' %}" style="color: inherit; text-decoration: none;">فروشگاه لوازم آرایشی</a></h4></div>
-    <div class="flex-grow-1 mx-3" style="position: relative; max-width: 400px;">
+    <div class="flex-grow-1 mx-3" style="position: relative; max-width: 500px;">
         <form method="GET" action="{% url 'store' %}" autocomplete="off">
-            <input id="search-input" type="search" name="q" placeholder="جستجو محصول..." class="form-control" autocomplete="off" />
+            <div class="input-group search-group-custom" style="border-radius: 24px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.07);">
+                <input id="search-input" type="text" name="q" placeholder="جستجو محصول..." class="form-control" autocomplete="off" style="border-radius: 0; border: none; box-shadow: none; height: 44px; outline: none;" />
+                <button type="button" id="clear-search-btn" class="btn btn-outline-secondary" style="border-radius: 0; width: 22px; height: 44px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; padding: 0 4px 0 0;">
+                    <span class="fa fa-times"></span>
+                </button>
+                <button type="submit" class="btn btn-outline-secondary" style="border-radius: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; padding: 0 0 0 4px;">
+                    <span class="fa fa-search"></span>
+                </button>
+            </div>
             <div id="suggestion-box"></div>
         </form>
     </div>
     <div class="d-flex align-items-center">
-        <a href="{% url 'cart-detail' %}" class="btn btn-warning">سبد خرید من</a>
+    <a href="{% url 'cart-detail' %}" class="btn btn-warning">سبد خرید من</a>
+</style>
+<style>
+    .btn-warning:hover {
+        background: #ffcf2f !important;
+        border-color: #ffcf2f !important;
+        color: #fff !important;
+    }
+</style>
 
         {% if user.is_authenticated %}
             <a href="{% url 'profile' %}" class="btn btn-outline-primary">پروفایل من</a>
@@ -175,6 +239,34 @@
 </main>
 
 <script>
+// دکمه حذف (ضربدر) برای پاک کردن سریع ورودی جست‌وجو و نمایش فقط هنگام فوکوس یا پر بودن input
+document.addEventListener('DOMContentLoaded', function() {
+    var clearBtn = document.getElementById('clear-search-btn');
+    var searchInput = document.getElementById('search-input');
+    function updateClearBtn() {
+        if (searchInput.value.length > 0 && document.activeElement === searchInput) {
+            clearBtn.classList.add('visible');
+        } else {
+            clearBtn.classList.remove('visible');
+        }
+    }
+    if (clearBtn && searchInput) {
+        clearBtn.onclick = function() {
+            searchInput.value = '';
+            searchInput.focus();
+            var box = document.getElementById('suggestion-box');
+            if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+            updateClearBtn();
+        };
+        searchInput.addEventListener('focus', updateClearBtn);
+        searchInput.addEventListener('blur', function() {
+            // با تاخیر کوتاه تا اگر کاربر روی ضربدر کلیک کرد، مخفی نشود
+            setTimeout(updateClearBtn, 120);
+        });
+        searchInput.addEventListener('input', updateClearBtn);
+        updateClearBtn();
+    }
+});
 // Custom autocomplete for product suggestions with product id
 document.addEventListener('DOMContentLoaded', function() {
     const input = document.getElementById('search-input');
