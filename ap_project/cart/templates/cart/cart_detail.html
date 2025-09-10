@@ -7,18 +7,22 @@
     <meta charset="UTF-8" />
     <title>سبد خرید شما</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.rtl.min.css' %}" />
+    <!-- فونت وزیر از استاتیک (اجباری برای کل صفحه) -->
     <style>
         @font-face {
-            font-family: 'Vazir';
-            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face/Vazir-Regular.woff2') format('woff2');
-            font-weight: normal;
+            font-family: 'Vazirmatn';
+            src: url('{% static 'fonts/vazirmatn/Vazirmatn[wght].woff2' %}') format('woff2');
+            font-weight: 100 900;
             font-style: normal;
+            font-display: swap;
+        }
+        html, body, * {
+            font-family: 'Vazirmatn', Vazir, Tahoma, Arial, sans-serif !important;
         }
         body {
             direction: rtl;
             text-align: right;
             background-color: #f8f9fa;
-            font-family: 'Vazir', sans-serif;
         }
         /* نوار بالا */
         .top-bar {
