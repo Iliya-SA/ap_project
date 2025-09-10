@@ -8,6 +8,24 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'font-awsome/6.7.2/css/all.min.css' %}" />
     <style>
+        /* فیکس کردن هدر بالای صفحه */
+        header.header-bar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1100;
+        }
+        nav.category-bar {
+            position: fixed;
+            top: 64px;
+            right: 0;
+            left: 0;
+            z-index: 1099;
+        }
+        main.container {
+            margin-top: 128px !important;
+        }
         /* دکمه ضربدر به صورت پیش‌فرض نامرئی است */
         #clear-search-btn {
             opacity: 0;
