@@ -3,121 +3,123 @@
 {% block title %}{{ product.name }} - فروشگاه لوازم آرایشی{% endblock %}
 {% block content %}
     <style>
-            .related-row, .related-row * {
-                user-select: none !important;
-                -webkit-user-select: none !important;
-                -ms-user-select: none !important;
-            }
-        body {
-            background-color: #f9fafb;
-            font-family: "Vazir", sans-serif;
-        }
+    /* جلوگیری از انتخاب متن هنگام درگ */
+    .related-row, .related-row * {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -ms-user-select: none !important;
+    }
 
-        .top-navbar {
-            background-color: #e8f4fc;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    /* کمک برای درگ و رفتار لمسی */
+    .related-row {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        cursor: grab;
+    }
+    .related-row.dragging { cursor: grabbing; }
 
-        .top-navbar a {
-            color: #0d6efd;
-            font-weight: 600;
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 30px;
-            border: 1px solid #0d6efd;
-            background-color: white;
-            transition: all 0.3s ease;
-        }
+    /* اطمینان از اینکه کارت‌ها قابل کلیک هستند ولی هنگام درگ غیرفعال می‌شوند */
+    .product-card, .related-card { -webkit-user-select: none; user-select: none; }
+    .product-card.drag-disable, .related-card.drag-disable { pointer-events: none !important; }
 
-        .top-navbar a:hover {
-            background-color: #d0e7ff;
-        }
+    /* کارت‌های مشابه (ظاهر و هاور و تصویر داخل کادر) */
+    .related-card img,
+    .product-card.related-card img {
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 8px;
+        width: 100%;
+        display: block;
+    }
 
-        .favorite-link {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #e91e63;
-        }
+    .related-card,
+    .product-card.related-card {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease, transform 0.18s ease;
+        background: #fff;
+        overflow: hidden;
+    }
 
-        .favorite-link:hover {
-            color: #c2185b;
-        }
+    .related-card:hover,
+    .product-card.related-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+    }
 
-        .favorite-link .heart {
-            font-size: 18px;
-        }
+    .product-card.related-card h6 {
+        margin-top: .5rem;
+        margin-bottom: .25rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-        .product-image {
-            max-height: 350px;
-            object-fit: contain;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            background-color: #fff;
-            padding: 10px;
-            width: 100%;
-        }
+    .product-card.related-card .price-tag {
+        bottom: 38px;
+        left: 0;
+        margin: 0;
+        font-size: 17px;
+    }
 
-        .star-icon {
-            color: #fbc02d;
-            font-size: 20px;
-            vertical-align: middle;
-        }
+    .product-card.related-card .bottom-row {
+        bottom: 10px;
+        left: 0;
+        padding: 0 10px;
+    }
 
-        .price-text {
-            color: #1b5e20;
-            font-weight: 700;
-            font-size: 28px;
-        }
+    .product-card.related-card .badge { font-size: 13px; }
+    .product-card.related-card .star { color: #fbc02d; font-size: 16px; }
+    .product-card.related-card .rating-val { font-size: 14px; }
 
-        .btn-buy {
-            font-size: 18px;
-            padding: 10px 0;
-        }
+    /* small enhancement: smoother momentum on iOS */
+    .related-row { -webkit-overflow-scrolling: touch; }
 
-        .related-card img {
-            height: 120px;
-            object-fit: contain;
-            border-radius: 8px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 8px;
-            width: 100%;
-        }
+    .top-navbar {
+        background-color: #e8f4fc;
+        padding: 10px 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        .related-card {
-            box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
-            border-radius: 8px;
-            transition: box-shadow 0.3s ease;
-        }
+    .top-navbar a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 8px 18px;
+        border-radius: 30px;
+        border: 1px solid #0d6efd;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
 
-        .related-card:hover {
-            box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
-        }
+    .top-navbar a:hover {
+        background-color: #d0e7ff;
+    }
 
-        .comments-section {
-            max-width: 100%;
-        }
+    .favorite-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #e91e63;
+    }
 
-        .comment-item {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 5px rgb(0 0 0 / 0.05);
-            margin-bottom: 15px;
-            padding: 15px;
-        }
+    .favorite-link:hover {
+        color: #c2185b;
+    }
 
-        .comment-header {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
+    .favorite-link .heart {
+        font-size: 18px;
+    }
 
     .product-image {
         max-height: 350px;
@@ -314,11 +316,23 @@
         <h4 class="mb-3" style="font-weight:600;">محصولات مشابه این محصول</h4>
         <div class="related-row d-flex overflow-auto gap-3 py-2">
             {% for similar in similar_products %}
-            <div class="product-card related-card flex-shrink-0 text-center p-2" style="min-width:210px; width:210px;">
+            <div class="product-card related-card flex-shrink-0" data-href="{% url 'product-detail' similar.pk %}">
                 <img src="{{ similar.image.url }}" alt="{{ similar.name }}">
-                <h6 class="mt-2">{{ similar.name }}</h6>
-                <p class="text-success fw-bold mb-1">{{ similar.price|floatformat:0|intcomma }} تومان</p>
-                <a href="{% url 'product-detail' similar.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
+                <h6 class="mt-2" style="margin-top:.5rem; margin-bottom:.25rem; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ similar.name }}</h6>
+                <p class="text-success fw-bold mb-1 w-100 price-tag" style="font-size:17px; position:absolute; bottom:38px; left:0; margin:0;">{{ similar.price|floatformat:0|intcomma }} تومان</p>
+                <div class="d-flex justify-content-between align-items-center w-100 bottom-row" style="position:absolute; bottom:10px; left:0; padding:0 10px;">
+                                    <span>
+                                        {% if similar.stock > 0 %}
+                                            <span class="badge bg-success" style="font-size:13px;">موجود</span>
+                                        {% else %}
+                                            <span class="badge bg-danger" style="font-size:13px;">ناموجود</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span style="color: #fbc02d; font-size: 16px;">&#9733;</span>
+                                        <span style="font-size:14px;">{{ similar.average_rating|default:0|floatformat:1 }}</span>
+                                    </span>
+                                </div>
             </div>
             {% empty %}
             <p class="text-muted">محصول مشابهی وجود ندارد.</p>
@@ -331,11 +345,23 @@
         <h4 class="mb-3" style="font-weight:600;">دیگر محصولات برند {{ product.brand }}</h4>
         <div class="related-row d-flex overflow-auto gap-3 py-2">
             {% for brand_item in brand_products %}
-            <div class="product-card related-card flex-shrink-0 text-center p-2" style="min-width:210px; width:210px;">
+            <div class="product-card related-card flex-shrink-0" data-href="{% url 'product-detail' brand_item.pk %}">
                 <img src="{{ brand_item.image.url }}" alt="{{ brand_item.name }}">
-                <h6 class="mt-2">{{ brand_item.name }}</h6>
-                <p class="text-success fw-bold mb-1">{{ brand_item.price|floatformat:0|intcomma }} تومان</p>
-                <a href="{% url 'product-detail' brand_item.pk %}" class="btn btn-outline-primary btn-sm">مشاهده</a>
+                <h6 class="mt-2" style="margin-top:.5rem; margin-bottom:.25rem; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ brand_item.name }}</h6>
+                <p class="text-success fw-bold mb-1 w-100 price-tag" style="font-size:17px; position:absolute; bottom:38px; left:0; margin:0;">{{ brand_item.price|floatformat:0|intcomma }} تومان</p>
+                <div class="d-flex justify-content-between align-items-center w-100 bottom-row" style="position:absolute; bottom:10px; left:0; padding:0 10px;">
+                                    <span>
+                                        {% if brand_item.stock > 0 %}
+                                            <span class="badge bg-success" style="font-size:13px;">موجود</span>
+                                        {% else %}
+                                            <span class="badge bg-danger" style="font-size:13px;">ناموجود</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span style="color: #fbc02d; font-size: 16px;">&#9733;</span>
+                                        <span style="font-size:14px;">{{ brand_item.average_rating|default:0|floatformat:1 }}</span>
+                                    </span>
+                                </div>
             </div>
             {% empty %}
             <p class="text-muted">محصول دیگری از این برند وجود ندارد.</p>
@@ -621,12 +647,27 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 <script>
-// Enable drag-to-scroll for all .related-row elements
+// Enable drag-to-scroll for all .related-row elements (بهبود یافته برای روانی بیشتر و جلوگیری از ناوبری ناخواسته)
 document.addEventListener('DOMContentLoaded', function(){
     document.querySelectorAll('.related-row').forEach(function(row){
-        let isDown = false, startX, scrollLeft;
+        let isDown = false, startX, scrollLeft, moved = false;
+        // برای هر کارت: ناوبری فقط روی کلیک واقعی
+        row.querySelectorAll('.product-card, .related-card').forEach(function(card){
+            card.addEventListener('pointerup', function(e){
+                if(moved) return;
+                const href = card.getAttribute('data-href') || card.dataset.href;
+                if(href) window.location.href = href;
+            });
+            card.addEventListener('click', function(e){
+                if(moved) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }, true);
+        });
         row.addEventListener('mousedown', function(e){
             isDown = true;
+            moved = false;
             row.classList.add('dragging');
             startX = e.pageX - row.offsetLeft;
             scrollLeft = row.scrollLeft;
@@ -638,27 +679,31 @@ document.addEventListener('DOMContentLoaded', function(){
         row.addEventListener('mouseup', function(){
             isDown = false;
             row.classList.remove('dragging');
+            setTimeout(()=>{ moved = false; }, 50);
         });
         row.addEventListener('mousemove', function(e){
             if(!isDown) return;
-            e.preventDefault();
             const x = e.pageX - row.offsetLeft;
-            const walk = (x - startX) * 1.2; // scroll speed
+            const walk = (x - startX);
+            if(Math.abs(walk) > 6) moved = true;
             row.scrollLeft = scrollLeft - walk;
         });
         // Touch support
         row.addEventListener('touchstart', function(e){
             isDown = true;
+            moved = false;
             startX = e.touches[0].pageX - row.offsetLeft;
             scrollLeft = row.scrollLeft;
         });
         row.addEventListener('touchend', function(){
             isDown = false;
+            setTimeout(()=>{ moved = false; }, 50);
         });
         row.addEventListener('touchmove', function(e){
             if(!isDown) return;
             const x = e.touches[0].pageX - row.offsetLeft;
-            const walk = (x - startX) * 1.2;
+            const walk = (x - startX);
+            if(Math.abs(walk) > 6) moved = true;
             row.scrollLeft = scrollLeft - walk;
         });
     });

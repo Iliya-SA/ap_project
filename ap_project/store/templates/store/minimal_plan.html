@@ -1,4 +1,5 @@
 {% extends 'store/base.html' %}
+{% load static %}
 {% load humanize %}
 {% block title %}طرح مینیمالیستی - روتین پوستی{% endblock %}
 
@@ -11,39 +12,281 @@
   <h2 class="mb-4">{{ plan_name }}</h2>
 
   {% for row in rows %}
-  {% if row.category == 'پاک کننده' or row.category == 'مرطوب‌کننده' or row.category == 'ضدآفتاب' %}
     <section class="mb-5">
       <h5 class="mb-2">{{ row.category }}</h5>
+
       {% if row.category == 'پاک کننده' %}
-  <p class="text-muted">برای شروع یک روتین پوستی سالم، همیشه با پاک‌کننده آغاز کنید! صبح و شب صورت خود را با یک فوم یا ژل ملایم بشویید تا آلودگی، چربی و آرایش از پوستتان پاک شود. آب ولرم بهترین انتخاب است و بعد از شست‌وشو، پوست را با حوله تمیز به آرامی خشک کنید. این مرحله کمک می‌کند محصولات بعدی بهتر جذب شوند و پوستتان همیشه شاداب بماند.</p>
-      {% elif row.category == 'سرم' %}
-        <p class="text-muted">سرم یک محصول مؤثر است که می‌تواند نیاز اصلی پوست را هدف قرار دهد.</p>
+        <p class="text-muted">برای شروع یک روتین پوستی سالم، همیشه با پاک‌کننده آغاز کنید! صبح و شب صورت خود را با یک فوم یا ژل ملایم بشویید تا آلودگی، چربی و آرایش از پوستتان پاک شود. آب ولرم بهترین انتخاب است و بعد از شست‌وشو، پوست را با حوله تمیز به آرامی خشک کنید. این مرحله کمک می‌کند محصولات بعدی بهتر جذب شوند و پوستتان همیشه شاداب بماند.</p>
       {% elif row.category == 'مرطوب‌کننده' %}
-  <p class="text-muted">مرطوب‌کننده دوست همیشگی پوست شماست! بعد از تونر و سرم، مقدار کافی مرطوب‌کننده را روی صورت و گردن بزنید و به آرامی ماساژ دهید تا جذب شود. این کار را صبح و شب انجام دهید تا پوستتان نرم، لطیف و درخشان بماند. اگر پوست خیلی خشکی دارید، در طول روز هم می‌توانید تمدید کنید.</p>
+        <p class="text-muted">مرطوب‌کننده دوست همیشگی پوست شماست! بعد از تونر و سرم، مقدار کافی مرطوب‌کننده را روی صورت و گردن بزنید و به آرامی ماساژ دهید تا جذب شود. این کار را صبح و شب انجام دهید تا پوستتان نرم، لطیف و درخشان بماند. اگر پوست خیلی خشکی دارید، در طول روز هم می‌توانید تمدید کنید.</p>
       {% elif row.category == 'ضدآفتاب' %}
-  <p class="text-muted">ضدآفتاب مهم‌ترین بخش روتین روزانه است! هر روز صبح، حتی در روزهای ابری یا داخل خانه، مقدار کافی ضدآفتاب را به کل صورت و گردن بزنید. ۳۰ دقیقه قبل از خروج از منزل استفاده کنید و اگر مدت طولانی بیرون هستید یا عرق کردید، هر ۲ تا ۳ ساعت تمدید کنید. با این کار از پوستتان در برابر پیری زودرس و آسیب‌های آفتاب محافظت می‌کنید.</p>
+        <p class="text-muted">ضدآفتاب مهم‌ترین بخش روتین روزانه است! هر روز صبح، حتی در روزهای ابری یا داخل خانه، مقدار کافی ضدآفتاب را به کل صورت و گردن بزنید. ۳۰ دقیقه قبل از خروج از منزل استفاده کنید و اگر مدت طولانی بیرون هستید یا عرق کردید، هر ۲ تا ۳ ساعت تمدید کنید. با این کار از پوستتان در برابر پیری زودرس و آسیب‌های آفتاب محافظت می‌کنید.</p>
       {% endif %}
+
       <div class="related-row d-flex overflow-auto gap-3 py-2">
-  {% for product in row.products %}
-          <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
-            <h6 class="mt-2">{{ product.name }}</h6>
-            <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-            {% if product.stock > 0 %}
-              <p class="text-success small mb-1">موجود</p>
-            {% else %}
-              <p class="text-danger small mb-1">ناموجود</p>
-            {% endif %}
-            <div class="mb-2 d-flex align-items-center gap-1">
-              <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-              <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-            </div>
-            <a href="/products/{{ product.pk }}/" class="btn btn-sm btn-primary">مشاهده</a>
+        {% for product in row.products %}
+          <div class="product-card related-card flex-shrink-0 text-center p-2 position-relative"
+               style="min-width:210px; width:210px; height:230px; cursor:pointer; padding-bottom:60px;"
+               data-href="{% url 'product-detail' product.pk %}">
+              <img src="{{ product.image.url }}" alt="{{ product.name }}">
+              <h6 class="mt-2">{{ product.name }}</h6>
+              <p class="text-success fw-bold mb-1 position-absolute w-100 price-tag" style="font-size:17px;">
+                  {{ product.price|floatformat:0|intcomma }} تومان
+              </p>
+              <div class="d-flex justify-content-between align-items-center position-absolute w-100 bottom-row" style="padding:0 10px;">
+                  <span>
+                      {% if product.stock > 0 %}
+                          <span class="badge bg-success">موجود</span>
+                      {% else %}
+                          <span class="badge bg-danger">ناموجود</span>
+                      {% endif %}
+                  </span>
+                  <span class="d-flex align-items-center gap-1">
+                      <span class="star">&#9733;</span>
+                      <span class="rating-val">{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                  </span>
+              </div>
           </div>
         {% endfor %}
       </div>
     </section>
-    {% endif %}
   {% endfor %}
 </div>
+
+<style>
+    /* جلوگیری از انتخاب متن هنگام درگ */
+    .related-row, .related-row * {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -ms-user-select: none !important;
+    }
+
+    /* کمک برای درگ و رفتار لمسی */
+    .related-row {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        cursor: grab;
+    }
+    .related-row.dragging { cursor: grabbing; }
+
+    /* اطمینان از اینکه کارت‌ها قابل کلیک هستند ولی هنگام درگ غیرفعال می‌شوند */
+    .product-card, .related-card { -webkit-user-select: none; user-select: none; }
+    .product-card.drag-disable, .related-card.drag-disable { pointer-events: none !important; }
+
+    /* کارت‌ها: ظاهر، تصویر و هاور */
+    .related-card img,
+    .product-card.related-card img {
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 8px;
+        width: 100%;
+        display: block;
+    }
+
+    .related-card,
+    .product-card.related-card {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease, transform 0.18s ease;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .related-card:hover,
+    .product-card.related-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+    }
+
+    .product-card.related-card h6 {
+        margin-top: .5rem;
+        margin-bottom: .25rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-card.related-card .price-tag {
+        bottom: 38px;
+        left: 0;
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .product-card.related-card .bottom-row {
+        bottom: 10px;
+        left: 0;
+        padding: 0 10px;
+    }
+
+    .product-card.related-card .badge { font-size: 13px; }
+    .product-card.related-card .star { color: #fbc02d; font-size: 16px; }
+    .product-card.related-card .rating-val { font-size: 14px; }
+
+    /* small enhancement: smoother momentum on iOS */
+    .related-row { -webkit-overflow-scrolling: touch; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.related-row').forEach(function (row) {
+
+    const MOVE_THRESHOLD = 8;   // پیکسل حدی که حرکت به عنوان درگ شناخته شود
+    const SUPPRESS_MS = 220;    // مدت زمان سرکوب کلیک بعد از درگ
+
+    let pointerActive = false;
+    let activePointerId = null;
+    let startX = 0, startY = 0;
+    let lastScrollLeft = 0;
+    let isDragging = false;
+    let suppressClick = false;
+    let suppressTimer = null;
+    let ticking = false;
+    let targetScrollLeft = 0;
+    let downTargetCard = null;
+
+    // تصاویر را غیرقابل درگ کن (prevents ghost image)
+    row.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+    // helper: غیرفعال/فعال کردن pointer events برای کارت‌ها هنگام درگ
+    function setChildPointerEventsDisabled(disabled) {
+      row.querySelectorAll('.product-card, .related-card').forEach(function(c) {
+        c.classList.toggle('drag-disable', disabled);
+      });
+    }
+
+    // یک‌بار: ثبت listener برای هر کارت برای ناوبری تک‌کلیک
+    row.querySelectorAll('.product-card, .related-card').forEach(function(card) {
+      // pointerup امن‌تر است چون با pointer capture کار می‌کند
+      card.addEventListener('pointerup', function(e) {
+        if (isDragging || suppressClick) return;
+        const href = card.getAttribute('data-href') || card.dataset.href;
+        if (href) window.location.href = href;
+      });
+
+      // fallback click
+      card.addEventListener('click', function(e) {
+        if (isDragging || suppressClick) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
+        }
+        const href = card.getAttribute('data-href') || card.dataset.href;
+        if (href) window.location.href = href;
+      }, true);
+    });
+
+    row.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pointerActive = true;
+      activePointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      lastScrollLeft = row.scrollLeft;
+      isDragging = false;
+      downTargetCard = e.target && e.target.closest ? e.target.closest('.product-card, .related-card') : null;
+      try { row.setPointerCapture(activePointerId); } catch(_) {}
+      row.classList.add('dragging');
+      document.body.style.userSelect = 'none';
+      // هنگام شروع درگ، غیر فعال کردن pointer-events روی کارت‌ها (بهبود عملکرد)
+      setChildPointerEventsDisabled(true);
+    }, false);
+
+    // pointermove throttled
+    row.addEventListener('pointermove', function (e) {
+      if (!pointerActive || e.pointerId !== activePointerId) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (Math.abs(dx) > MOVE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+        isDragging = true;
+        // محاسبه هدف (بدون دستکاری DOM)
+        targetScrollLeft = lastScrollLeft - dx * 1.2;
+
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(function () {
+            row.scrollLeft = targetScrollLeft;
+            ticking = false;
+          });
+        }
+        // جلوگیری از اسکرول صفحه (فقط وقتی داریم درگ افقی واقعی انجام میدیم)
+        e.preventDefault && e.preventDefault();
+      }
+    }, { passive: false });
+
+    // خاتمه اشاره‌گر — آزادسازی و تنظیم suppressClick اگر لازم بود
+    function finishPointer() {
+      if (!pointerActive) return;
+      try { if (activePointerId !== null) row.releasePointerCapture(activePointerId); } catch(_) {}
+      pointerActive = false;
+      activePointerId = null;
+      row.classList.remove('dragging');
+      setChildPointerEventsDisabled(false);
+      document.body.style.userSelect = '';
+      if (isDragging) {
+        suppressClick = true;
+        clearTimeout(suppressTimer);
+        suppressTimer = setTimeout(function () {
+          suppressClick = false;
+        }, SUPPRESS_MS);
+      }
+      isDragging = false;
+    }
+
+    row.addEventListener('pointerup', function (e) {
+      // قبل از finish: محاسبهٔ میزان حرکت برای تصمیم‌گیری در مورد کلیک/درگ
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const moved = Math.hypot(dx, dy);
+      const wasDragging = isDragging;
+
+      finishPointer();
+
+      // اگر حرکت کم بوده و کلیک سرکوب نشده، هدفِ زیر نشانگر را ناوبری کن
+      if (!wasDragging && moved <= MOVE_THRESHOLD && !suppressClick) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const card = el && el.closest ? el.closest('.product-card, .related-card') : null;
+        if (card && !card.classList.contains('drag-disable')) {
+          const href = card.getAttribute('data-href') || card.dataset.href;
+          if (href) window.location.href = href;
+        }
+      }
+    }, { passive: true });
+
+    row.addEventListener('pointercancel', finishPointer);
+    row.addEventListener('pointerleave', finishPointer);
+
+    // اگر کلیک بلافاصله بعد از درگ آمد، آن را سرکوب کنیم
+    row.addEventListener('click', function (e) {
+      if (suppressClick) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+
+    // پشتیبانی از کیبورد برای دسترسی‌پذیری
+    row.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const focused = document.activeElement;
+        const card = focused && focused.closest ? focused.closest('.product-card, .related-card') : null;
+        if (card) {
+          const href = card.getAttribute('data-href') || card.dataset.href;
+          if (href) {
+            window.location.href = href;
+            e.preventDefault();
+          }
+        }
+      }
+    });
+
+  }); // forEach row
+});
+</script>
+
 {% endblock %}

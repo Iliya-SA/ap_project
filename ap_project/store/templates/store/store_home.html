@@ -5,34 +5,132 @@
 {% block title %}صفحه اصلی فروشگاه{% endblock %}
 
 {% block content %}
+<!-- استایل‌های مربوط به نمایش کارت (کپی از صفحه‌ی صحیح) -->
+<style>
+    /* جلوگیری از انتخاب متن هنگام درگ */
+    .related-row, .related-row * {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -ms-user-select: none !important;
+    }
+
+    /* کمک برای درگ و رفتار لمسی */
+    .related-row {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        cursor: grab;
+    }
+    .related-row.dragging { cursor: grabbing; }
+
+    /* اطمینان از اینکه کارت‌ها قابل کلیک هستند ولی هنگام درگ غیرفعال می‌شوند */
+    .product-card, .related-card { -webkit-user-select: none; user-select: none; }
+    .product-card.drag-disable, .related-card.drag-disable { pointer-events: none !important; }
+
+    /* کارت‌های مشابه (ظاهر و هاور و تصویر داخل کادر) */
+    .related-card img,
+    .product-card.related-card img {
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 8px;
+        width: 100%;
+        display: block;
+    }
+
+    .related-card,
+    .product-card.related-card {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease, transform 0.18s ease;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .related-card:hover,
+    .product-card.related-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+    }
+
+    /* شبکه ریسپانسیو برای جدیدترین محصولات */
+    .new-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: min(3vw, 22px);
+        margin: 0;
+    }
+    .new-products-grid .product-card.related-card {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        min-height: 230px;
+        padding: 0.6rem;
+        text-align: center;
+        position: relative;
+        /* کارت‌ها با عرض صفحه تغییر می‌کنند */
+    }
+
+    .product-card.related-card h6 {
+        margin-top: .5rem;
+        margin-bottom: .25rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-card.related-card .price-tag {
+        bottom: 38px;
+        left: 0;
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .product-card.related-card .bottom-row {
+        bottom: 10px;
+        left: 0;
+        padding: 0 10px;
+    }
+
+    .product-card.related-card .badge { font-size: 13px; }
+    .product-card.related-card .star { color: #fbc02d; font-size: 16px; }
+    .product-card.related-card .rating-val { font-size: 14px; }
+
+</style>
+
 <section>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5>جدیدترین محصولات</h5>
-    <a href="/products" class="btn btn-sm btn-outline-primary">مشاهده همه</a>
+        <a href="/products" class="btn btn-sm btn-outline-primary">مشاهده همه</a>
     </div>
-    <div class="row">
+    <div class="new-products-grid">
         {% for product in new_products %}
-        <div class="col-md-3 col-sm-6">
-            <div class="product-card">
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                                <h6>{{ product.name }}</h6>
-                                <p class="text-success fw-bold" style="color: #1b5e20;">
-                                        {{ product.price|intcomma }} تومان
-                                </p>
-                                {% if product.stock > 0 %}
-                                    <p class="text-success small mb-1">موجود</p>
-                                {% else %}
-                                    <p class="text-danger small mb-1">ناموجود</p>
-                                {% endif %}
-                                <p class="mb-2 d-flex align-items-center gap-1">
-                                        <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                                        <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                                </p>
-                                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+            <div class="product-card related-card text-center position-relative"
+                 style="min-width:215px; min-height:230px; cursor:pointer; padding-bottom:60px;"
+                onclick="window.location.href='{% url 'product-detail' product.pk %}'">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+                <h6 class="mt-2">{{ product.name }}</h6>
+                <p class="text-success fw-bold mb-1 position-absolute w-100 price-tag" style="font-size:17px;">
+                    {{ product.price|floatformat:0|intcomma }} تومان
+                </p>
+                <div class="d-flex justify-content-between align-items-center position-absolute w-100 bottom-row" style="padding:0 10px;">
+                    <span>
+                        {% if product.stock > 0 %}
+                            <span class="badge bg-success">موجود</span>
+                        {% else %}
+                            <span class="badge bg-danger">ناموجود</span>
+                        {% endif %}
+                    </span>
+                    <span class="d-flex align-items-center gap-1">
+                        <span class="star">&#9733;</span>
+                        <span class="rating-val">{{ product.average_rating|default:0|floatformat:1 }}</span>
+                    </span>
+                </div>
             </div>
-        </div>
         {% empty %}
-        <p>محصولی یافت نشد.</p>
+            <p>محصولی یافت نشد.</p>
         {% endfor %}
     </div>
 </section>
@@ -45,20 +143,27 @@
         {% elif recommended_products %}
             <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
                 {% for product in recommended_products %}
-                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                    <div class="product-card related-card flex-shrink-0 text-center p-2 position-relative"
+                         style="min-width:210px; width:210px; height:230px; cursor:pointer; padding-bottom:60px;"
+                         data-href="{% url 'product-detail' product.pk %}">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
                         <h6 class="mt-2">{{ product.name }}</h6>
-                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-                        {% if product.stock > 0 %}
-                            <p class="text-success small mb-1">موجود</p>
-                        {% else %}
-                            <p class="text-danger small mb-1">ناموجود</p>
-                        {% endif %}
-                        <div class="mb-2 d-flex align-items-center gap-1">
-                            <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        <p class="text-success fw-bold mb-1 position-absolute w-100 price-tag" style="font-size:17px;">
+                            {{ product.price|floatformat:0|intcomma }} تومان
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center position-absolute w-100 bottom-row">
+                            <span>
+                                {% if product.stock > 0 %}
+                                    <span class="badge bg-success">موجود</span>
+                                {% else %}
+                                    <span class="badge bg-danger">ناموجود</span>
+                                {% endif %}
+                            </span>
+                            <span class="d-flex align-items-center gap-1">
+                                <span class="star">&#9733;</span>
+                                <span class="rating-val">{{ product.average_rating|default:0|floatformat:1 }}</span>
+                            </span>
                         </div>
-                        <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
                     </div>
                 {% endfor %}
             </div>
@@ -77,24 +182,27 @@
         {% if seasonal_products %}
             <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
                 {% for product in seasonal_products %}
-                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                    <div class="product-card related-card flex-shrink-0 text-center p-2 position-relative"
+                         style="min-width:210px; width:210px; height:230px; cursor:pointer; padding-bottom:60px;"
+                         data-href="{% url 'product-detail' product.pk %}">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
                         <h6 class="mt-2">{{ product.name }}</h6>
-                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-                        {% if product.stock > 0 %}
-                            <p class="text-success small mb-1">موجود</p>
-                        {% else %}
-                            <p class="text-danger small mb-1">ناموجود</p>
-                        {% endif %}
-                        <p class="mb-2 d-flex align-items-center gap-1">
-                            <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        <p class="text-success fw-bold mb-1 position-absolute w-100 price-tag" style="font-size:17px;">
+                            {{ product.price|floatformat:0|intcomma }} تومان
                         </p>
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                        {% else %}
-                            <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center position-absolute w-100 bottom-row">
+                            <span>
+                                {% if product.stock > 0 %}
+                                    <span class="badge bg-success">موجود</span>
+                                {% else %}
+                                    <span class="badge bg-danger">ناموجود</span>
+                                {% endif %}
+                            </span>
+                            <span class="d-flex align-items-center gap-1">
+                                <span class="star">&#9733;</span>
+                                <span class="rating-val">{{ product.average_rating|default:0|floatformat:1 }}</span>
+                            </span>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -102,8 +210,6 @@
             <p>محصول فصلی‌ای یافت نشد.</p>
         {% endif %}
     </div>
-</section>
-
 </section>
 
 <section class="mt-4">
@@ -118,20 +224,27 @@
         {% elif liked_favorites %}
             <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3" style="user-select:none;">
                 {% for product in liked_favorites|slice:":10" %}
-                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                    <div class="product-card related-card flex-shrink-0 text-center p-2 position-relative"
+                         style="min-width:210px; width:210px; height:230px; cursor:pointer; padding-bottom:60px;"
+                         data-href="{% url 'product-detail' product.pk %}">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
                         <h6 class="mt-2">{{ product.name }}</h6>
-                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-                        {% if product.stock > 0 %}
-                            <p class="text-success small mb-1">موجود</p>
-                        {% else %}
-                            <p class="text-danger small mb-1">ناموجود</p>
-                        {% endif %}
-                        <div class="mb-2 d-flex align-items-center gap-1">
-                            <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        <p class="text-success fw-bold mb-1 position-absolute w-100 price-tag" style="font-size:17px;">
+                            {{ product.price|floatformat:0|intcomma }} تومان
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center position-absolute w-100 bottom-row">
+                            <span>
+                                {% if product.stock > 0 %}
+                                    <span class="badge bg-success">موجود</span>
+                                {% else %}
+                                    <span class="badge bg-danger">ناموجود</span>
+                                {% endif %}
+                            </span>
+                            <span class="d-flex align-items-center gap-1">
+                                <span class="star">&#9733;</span>
+                                <span class="rating-val">{{ product.average_rating|default:0|floatformat:1 }}</span>
+                            </span>
                         </div>
-                        <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
                     </div>
                 {% endfor %}
             </div>
@@ -140,62 +253,174 @@
         {% endif %}
     </div>
 
-    <!-- recent_purchases grid removed — favorites shown in horizontal scroller above -->
 </section>
 {% endblock %}
-        <style>
-        .related-row, .related-row * {
-            user-select: none !important;
-            -webkit-user-select: none !important;
-            -ms-user-select: none !important;
+
+{% block _scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.related-row').forEach(function (row, idx) {
+
+    const MOVE_THRESHOLD = 8;
+    const SUPPRESS_MS = 250;
+
+    let pointerActive = false;
+    let activePointerId = null;
+    let startX = 0, startY = 0;
+    let lastScrollLeft = 0;
+    let isDragging = false;
+    let suppressClick = false;
+    let suppressTimer = null;
+
+    // فقط یک‌بار: تصاویر غیرقابل درگ، لیسنرهای مستقل روی هر کارت
+    row.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+    // تابع سادهٔ تغییر کلاس (بدون افزودن لیسنر)
+    function setChildPointerEventsDisabled(disabled) {
+      row.querySelectorAll('.product-card, .related-card').forEach(function(c) {
+        c.classList.toggle('drag-disable', disabled);
+      });
+    }
+
+    // اضافه کردن یک‌بار لیسنرهای کارت — این کد فقط یک بار اجرا می‌شود
+    row.querySelectorAll('.product-card, .related-card').forEach(function(card, cidx) {
+
+      // pointerup روی کارت: امن و سریع برای ناوبری تک کلیک
+      card.addEventListener('pointerup', function(e) {
+        // اگر در وضعیت درگ بودیم یا کلیک سرکوب شده، نپریم
+        if (isDragging) {
+          return;
         }
-        </style>
-        <script>
-        // Enable drag-to-scroll for all .related-row elements, and prevent selection while dragging
-        document.addEventListener('DOMContentLoaded', function(){
-            document.querySelectorAll('.related-row').forEach(function(row){
-                let isDown = false, startX, scrollLeft;
-                row.addEventListener('mousedown', function(e){
-                    isDown = true;
-                    row.classList.add('dragging');
-                    startX = e.pageX - row.offsetLeft;
-                    scrollLeft = row.scrollLeft;
-                    document.body.style.userSelect = 'none';
-                });
-                row.addEventListener('mouseleave', function(){
-                    isDown = false;
-                    row.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                });
-                row.addEventListener('mouseup', function(){
-                    isDown = false;
-                    row.classList.remove('dragging');
-                    document.body.style.userSelect = '';
-                });
-                row.addEventListener('mousemove', function(e){
-                    if(!isDown) return;
-                    e.preventDefault();
-                    const x = e.pageX - row.offsetLeft;
-                    const walk = (x - startX) * 1.2; // scroll speed
-                    row.scrollLeft = scrollLeft - walk;
-                });
-                // Touch support
-                row.addEventListener('touchstart', function(e){
-                    isDown = true;
-                    startX = e.touches[0].pageX - row.offsetLeft;
-                    scrollLeft = row.scrollLeft;
-                    document.body.style.userSelect = 'none';
-                });
-                row.addEventListener('touchend', function(){
-                    isDown = false;
-                    document.body.style.userSelect = '';
-                });
-                row.addEventListener('touchmove', function(e){
-                    if(!isDown) return;
-                    const x = e.touches[0].pageX - row.offsetLeft;
-                    const walk = (x - startX) * 1.2;
-                    row.scrollLeft = scrollLeft - walk;
-                });
-            });
-        });
-        </script>
+        if (suppressClick) {
+          return;
+        }
+        // ناوبری
+        const href = card.getAttribute('data-href') || card.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      });
+
+      // پشتیبانی کلیک به عنوان fallback (مثلاً برخی مرورگرها)
+      card.addEventListener('click', function(e) {
+        if (isDragging || suppressClick) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
+        }
+        // اگر pointerup نادیده گرفته شده، click هم ممکنه بیاد اینجا و ناوبری کنه
+        const href = card.getAttribute('data-href') || card.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      }, true);
+    });
+
+    // ردیف: مدیریت درگ/اسکرول
+    row.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pointerActive = true;
+      activePointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      lastScrollLeft = row.scrollLeft;
+      isDragging = false;
+      try { row.setPointerCapture(activePointerId); } catch(_) {}
+      row.classList.add('dragging');
+      document.body.style.userSelect = 'none';
+    }, { passive: true });
+
+    row.addEventListener('pointermove', function (e) {
+      if (!pointerActive || e.pointerId !== activePointerId) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > MOVE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+        isDragging = true;
+        setChildPointerEventsDisabled(true);
+        row.scrollLeft = lastScrollLeft - dx * 1.2;
+      }
+      if (isDragging) {
+        // جلوگیری از رفتار پیشفرض وقتی داریم اسکرول دستی انجام میدیم
+        e.preventDefault && e.preventDefault();
+      }
+    }, { passive: false });
+
+    function finishPointer(e) {
+      if (!pointerActive) return;
+      try { if (activePointerId !== null) row.releasePointerCapture(activePointerId); } catch(_) {}
+      pointerActive = false;
+      activePointerId = null;
+      row.classList.remove('dragging');
+      setChildPointerEventsDisabled(false);
+      document.body.style.userSelect = '';
+      if (isDragging) {
+        suppressClick = true;
+        clearTimeout(suppressTimer);
+        suppressTimer = setTimeout(() => {
+          suppressClick = false;
+          console.log("⏱ suppressClick خاموش شد");
+        }, SUPPRESS_MS);
+      }
+      isDragging = false;
+    }
+
+    row.addEventListener('pointerup', function (e) {
+    // وضعیت قبل از پاکسازی
+    const wasDragging = isDragging;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const moved = Math.hypot(dx, dy);
+
+    // ابتدا وضعیت درگ/کلاس‌ها را تمام کن
+    finishPointer(e);
+
+    // فقط وقتی که حرکت کم بوده و کلیک سرکوب نشده — ناوبری انجام بده
+    if (!wasDragging && moved <= MOVE_THRESHOLD && !suppressClick) {
+        // اینجا از elementFromPoint استفاده می‌کنیم چون pointer capture ممکنه target اصلی را تغییر دهد
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const card = el && el.closest ? el.closest('.product-card, .related-card') : null;
+        if (card) {
+        // در صورتی که کلاس drag-disable فعال باشه، نپریم
+        if (card.classList.contains('drag-disable')) {
+            return;
+        }
+        const href = card.getAttribute('data-href') || card.dataset.href;
+        if (href) {
+            window.location.href = href;
+        }
+        }
+    }
+    }, { passive: true });
+
+    row.addEventListener('pointercancel', finishPointer);
+    row.addEventListener('pointerleave', finishPointer);
+
+    // اگر کلیک بلافاصله بعد از درگ آمد، آن را سرکوب کنیم
+    row.addEventListener('click', function (e) {
+      if (suppressClick) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+
+
+    // دسترسی کیبورد (اگر کارت‌ها فوکوس‌پذیر باشند)
+    row.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const focused = document.activeElement;
+        const card = focused && focused.closest ? focused.closest('.product-card, .related-card') : null;
+        if (card) {
+          const href = card.getAttribute('data-href') || card.dataset.href;
+          if (href) {
+            window.location.href = href;
+            e.preventDefault();
+          }
+        }
+      }
+    });
+
+  }); // forEach row
+});
+</script>
+{% endblock %}

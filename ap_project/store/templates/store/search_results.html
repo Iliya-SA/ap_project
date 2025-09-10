@@ -2,6 +2,72 @@
 {% load humanize %}
 {% block title %}نتایج جستجو{% endblock %}
 {% block content %}
+<style>
+  .search-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    gap: min(3vw, 22px);
+    margin: 0;
+  }
+  .search-products-grid .product-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 230px;
+    padding: 0.6rem;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.18s ease;
+    cursor: pointer;
+  }
+  .search-products-grid .product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
+  }
+  .search-products-grid .product-card img {
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 8px;
+    width: 100%;
+    display: block;
+  }
+  .search-products-grid .product-card h6 {
+    margin-top: .5rem;
+    margin-bottom: .25rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-products-grid .product-card .price-tag {
+    bottom: 38px;
+    left: 0;
+    margin: 0;
+    font-size: 17px;
+    position: absolute;
+    width: 100%;
+  }
+  .search-products-grid .product-card .bottom-row {
+    bottom: 10px;
+    left: 0;
+    padding: 0 10px;
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .search-products-grid .product-card .badge { font-size: 13px; }
+  .search-products-grid .product-card .star { color: #fbc02d; font-size: 16px; }
+  .search-products-grid .product-card .rating-val { font-size: 14px; }
+</style>
 <div class="container mt-4">
   <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
     <a href="/" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
@@ -16,7 +82,7 @@
       <option value="alpha_desc">الفبایی (نزولی)</option>
     </select>
   </div>
-  <div id="products-grid" class="row"></div>
+  <div id="products-grid" class="search-products-grid"></div>
   <div id="loading" class="text-center my-3" style="display:none;">
     <span class="spinner-border"></span>
     <span>در حال بارگذاری...</span>
@@ -39,22 +105,24 @@ function loadProducts(reset=false) {
         grid.innerHTML = '<div class="col-12 text-center"><p>هیچ محصولی با این مشخصات پیدا نشد.</p></div>';
       }
       data.products.forEach(product => {
-        const col = document.createElement('div');
-        col.className = 'col-md-3 col-sm-6';
-        col.innerHTML = `
-          <div class="product-card">
-            <img src="${product.image_url}" alt="${product.name}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
-            <h6 class="mt-2">${product.name}</h6>
-            <p class="text-success fw-bold mb-1">${product.price.toLocaleString()} تومان</p>
-            ${product.stock > 0 ? '<p class="text-success small mb-1">موجود</p>' : '<p class="text-danger small mb-1">ناموجود</p>'}
-            <div class="mb-2 d-flex align-items-center gap-1">
-              <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-              <span>${product.avg_rating.toFixed(1)}</span>
-            </div>
-            <a href="/products/${product.id}/" class="btn btn-sm btn-primary">مشاهده</a>
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => window.location.href = `/products/${product.id}/`;
+        card.innerHTML = `
+          <img src="${product.image_url}" alt="${product.name}" />
+          <h6 class="mt-2">${product.name}</h6>
+          <p class="text-success fw-bold mb-1 price-tag">${product.price.toLocaleString()} تومان</p>
+          <div class="bottom-row">
+            <span>
+              ${product.stock > 0 ? '<span class="badge bg-success">موجود</span>' : '<span class="badge bg-danger">ناموجود</span>'}
+            </span>
+            <span class="d-flex align-items-center gap-1">
+              <span class="star">&#9733;</span>
+              <span class="rating-val">${product.avg_rating.toFixed(1)}</span>
+            </span>
           </div>
         `;
-        grid.appendChild(col);
+        grid.appendChild(card);
       });
       loading = false;
       document.getElementById('loading').style.display = 'none';

@@ -4,37 +4,106 @@
 {% block title %}محصولات فصل {{ season }}{% endblock %}
 
 {% block content %}
+<style>
+    .seasonal-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: min(3vw, 22px);
+        margin: 0;
+    }
+    .seasonal-products-grid .product-card {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        min-height: 230px;
+        padding: 0.6rem;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease, transform 0.18s ease;
+        cursor: pointer;
+    }
+    .seasonal-products-grid .product-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+    }
+    .seasonal-products-grid .product-card img {
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 8px;
+        width: 100%;
+        display: block;
+    }
+    .seasonal-products-grid .product-card h6 {
+        margin-top: .5rem;
+        margin-bottom: .25rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .seasonal-products-grid .product-card .price-tag {
+        bottom: 38px;
+        left: 0;
+        margin: 0;
+        font-size: 17px;
+        position: absolute;
+        width: 100%;
+    }
+    .seasonal-products-grid .product-card .bottom-row {
+        bottom: 10px;
+        left: 0;
+        padding: 0 10px;
+        position: absolute;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .seasonal-products-grid .product-card .badge { font-size: 13px; }
+    .seasonal-products-grid .product-card .star { color: #fbc02d; font-size: 16px; }
+    .seasonal-products-grid .product-card .rating-val { font-size: 14px; }
+</style>
 <div class="container mt-4">
-    <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
-        <a href="/" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
-    </div>
+        <div class="d-flex justify-content-start mb-3" style="direction: rtl;">
+                <a href="/" class="btn btn-outline-secondary" style="min-width:120px; text-align:right;">&larr; بازگشت</a>
+        </div>
 </div>
 <section>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5>محصولات فصل {{ season }}</h5>
-    </div>
-    <div class="row">
-        {% for product in seasonal_products %}
-            <div class="col-md-3 col-sm-6">
-                <div class="product-card">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
-                    <h6 class="mt-2">{{ product.name }}</h6>
-                    <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-                    {% if product.stock > 0 %}
-                        <p class="text-success small mb-1">موجود</p>
-                    {% else %}
-                        <p class="text-danger small mb-1">ناموجود</p>
-                    {% endif %}
-                    <div class="mb-2 d-flex align-items-center gap-1">
-                        <span class="star-icon" style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                        <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                    </div>
-                    <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-                </div>
-            </div>
-        {% empty %}
-            <p>هیچ محصول فصلی یافت نشد.</p>
-        {% endfor %}
-    </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>محصولات فصل {{ season }}</h5>
+        </div>
+        <div class="seasonal-products-grid">
+                {% for product in seasonal_products %}
+                        <div class="product-card text-center position-relative"
+                                 style="min-width:215px; min-height:230px; cursor:pointer; padding-bottom:60px;"
+                                 onclick="window.location.href='{% url 'product-detail' product.pk %}'">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+                                <h6 class="mt-2">{{ product.name }}</h6>
+                                <p class="text-success fw-bold mb-1 price-tag">{{ product.price|intcomma }} تومان</p>
+                                <div class="bottom-row">
+                                        <span>
+                                                {% if product.stock > 0 %}
+                                                        <span class="badge bg-success">موجود</span>
+                                                {% else %}
+                                                        <span class="badge bg-danger">ناموجود</span>
+                                                {% endif %}
+                                        </span>
+                                        <span class="d-flex align-items-center gap-1">
+                                                <span class="star">&#9733;</span>
+                                                <span class="rating-val">{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                                        </span>
+                                </div>
+                        </div>
+                {% empty %}
+                        <p>هیچ محصول فصلی یافت نشد.</p>
+                {% endfor %}
+        </div>
 </section>
 {% endblock %}
