@@ -1,35 +1,51 @@
-<!DOCTYPE html>
-<html lang="fa">
-    <head>
-        <meta charset="UTF-8">
-        <title>ورود</title>
-        <style>
-            body {
-                background-color: #87CEEB; /* رنگ آبی آسمانی */
-                color: #000000;
-                font-family: Arial, sans-serif;
-                padding: 20px;
-            }
-            button {
-                background-color: #005f99;
-                color: white;
-                border: none;
-                padding: 10px 15px;
-                cursor: pointer;
-                border-radius: 5px;
-            }
-            button:hover {
-                background-color: #004d80;
-            }
-        </style>
-    </head>
-    
-<body>
-    <h1>فرم ورود</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">ورود</button>
-    </form>
-</body>
-</html>
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-3">ورود</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+
+                    {# Render fields individually so we can show Persian helper text next to each input #}
+                    {% for field in form.visible_fields %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                {% if field.name == 'username' %}
+                                    نام کاربری یا ایمیل/شماره تلفن خود را وارد کنید.
+                                {% elif field.name == 'email' %}
+                                    ایمیل معتبر خود را وارد کنید؛ برای بازیابی رمز استفاده می‌شود.
+                                {% elif field.name == 'password' %}
+                                    رمز عبور خود را وارد کنید.
+                                {% else %}
+                                    {{ field.help_text|default:"لطفاً این فیلد را پر کنید." }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">ورود</button>
+                        <a href="{% url 'signup' %}" class="btn btn-outline-secondary">ثبت‌نام</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

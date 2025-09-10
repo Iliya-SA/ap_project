@@ -31,7 +31,11 @@
             <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
             <h6 class="mt-2">{{ product.name }}</h6>
             <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
-            {# <p class="text-muted small mb-1">امتیاز: {{ product.final_score|default:'-' }}</p> #}
+            {% if product.stock > 0 %}
+              <p class="text-success small mb-1">موجود</p>
+            {% else %}
+              <p class="text-danger small mb-1">ناموجود</p>
+            {% endif %}
             <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
           </div>
         {% endfor %}

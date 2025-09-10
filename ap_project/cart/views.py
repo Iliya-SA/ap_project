@@ -68,11 +68,19 @@ def checkout(request):
 
     # آیتم‌های سبد خرید رو به سفارش منتقل کنیم
     for item in cart.items.all():
+        # کم کردن موجودی محصول
+        product = item.product
+        if product.stock >= item.quantity:
+            product.stock -= item.quantity
+            product.save()
+        else:
+            # اگر موجودی کافی نبود، می‌توان پیام خطا یا هندل مناسب اضافه کرد
+            continue
         OrderItem.objects.create(
             order=order,
-            product=item.product,
+            product=product,
             quantity=item.quantity,
-            price=item.product.price
+            price=product.price
         )
 
     # سبد خرید رو خالی کنیم

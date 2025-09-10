@@ -11,16 +11,21 @@
         {% for product in new_products %}
         <div class="col-md-3 col-sm-6">
             <div class="product-card">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                <h6>{{ product.name }}</h6>
-                <p class="text-success fw-bold" style="color: #1b5e20;">
-                    {{ product.price|intcomma }} تومان
-                </p>
-                <p class="mb-2 d-flex align-items-center gap-1">
-                    <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                    <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                </p>
-                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+                                <h6>{{ product.name }}</h6>
+                                <p class="text-success fw-bold" style="color: #1b5e20;">
+                                        {{ product.price|intcomma }} تومان
+                                </p>
+                                {% if product.stock > 0 %}
+                                    <p class="text-success small mb-1">موجود</p>
+                                {% else %}
+                                    <p class="text-danger small mb-1">ناموجود</p>
+                                {% endif %}
+                                <p class="mb-2 d-flex align-items-center gap-1">
+                                        <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+                                        <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                                </p>
+                                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
             </div>
         </div>
         {% empty %}
@@ -40,11 +45,22 @@
                 <p class="text-success fw-bold" style="color: #1b5e20;">
                     {{ product.price|intcomma }} تومان
                 </p>
+                <p class="mb-1">
+                    {% if product.stock > 0 %}
+                        <span class="badge bg-success">موجود</span>
+                    {% else %}
+                        <span class="badge bg-danger">ناموجود</span>
+                    {% endif %}
+                </p>
                 <p class="mb-2 d-flex align-items-center gap-1">
                     <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
                     <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
                 </p>
-                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% else %}
+                    <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% endif %}
             </div>
         </div>
         {% empty %}
@@ -67,11 +83,22 @@
                 <p class="text-success fw-bold" style="color: #1b5e20;">
                     {{ product.price|intcomma }} تومان
                 </p>
+                <p class="mb-1">
+                    {% if product.stock > 0 %}
+                        <span class="badge bg-success">موجود</span>
+                    {% else %}
+                        <span class="badge bg-danger">ناموجود</span>
+                    {% endif %}
+                </p>
                 <p class="mb-2 d-flex align-items-center gap-1">
                     <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
                     <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
                 </p>
-                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% else %}
+                    <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                {% endif %}
             </div>
         </div>
         {% empty %}
@@ -86,46 +113,92 @@
         <a href="{% url 'favorites-list' %}" class="btn btn-sm btn-outline-primary">نمایش همه علاقه‌مندی‌ها</a>
     </div>
 
-    <div class="row">
-        {% for product in liked_favorites %}
-        <div class="col-md-3 col-sm-6">
-            <div class="product-card">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                <h6>{{ product.name }}</h6>
-                <p class="text-success fw-bold" style="color: #1b5e20;">
-                    {{ product.price|intcomma }} تومان
-                </p>
-                <p class="mb-2 d-flex align-items-center gap-1">
-                    <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                    <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                </p>
-                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+    <div>
+        {% if liked_favorites %}
+            <div class="related-row d-flex overflow-auto gap-3 py-2 mb-3">
+                {% for product in liked_favorites|slice:":10" %}
+                    <div class="product-card flex-shrink-0" style="min-width:210px; width:210px;">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:140px; object-fit:cover; width:100%; border-radius:8px;" />
+                        <h6 class="mt-2">{{ product.name }}</h6>
+                        <p class="text-success fw-bold mb-1">{{ product.price|intcomma }} تومان</p>
+                        {% if product.stock > 0 %}
+                            <p class="text-success small mb-1">موجود</p>
+                        {% else %}
+                            <p class="text-danger small mb-1">ناموجود</p>
+                        {% endif %}
+                        <p class="mb-2 d-flex align-items-center gap-1">
+                            <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
+                            <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
+                        </p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                        {% else %}
+                            <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
             </div>
-        </div>
-        {% empty %}
-        <p>محصول مورد علاقه‌ای یافت نشد.</p>
-        {% endfor %}
+        {% else %}
+            <p>محصول مورد علاقه‌ای یافت نشد.</p>
+        {% endif %}
     </div>
 
-    <div class="row mt-3">
-        {% for product in recent_purchases %}
-        <div class="col-md-3 col-sm-6">
-            <div class="product-card">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
-                <h6>{{ product.name }}</h6>
-                <p class="text-success fw-bold" style="color: #1b5e20;">
-                    {{ product.price|intcomma }} تومان
-                </p>
-                <p class="mb-2 d-flex align-items-center gap-1">
-                    <span style="color: #fbc02d; font-size: 18px;">&#9733;</span>
-                    <span>{{ product.avg_rating|default:0|floatformat:1 }}</span>
-                </p>
-                <a href="{% url 'product-detail' product.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
-            </div>
-        </div>
-        {% empty %}
-        <p>خرید اخیر یافت نشد.</p>
-        {% endfor %}
-    </div>
+    <!-- recent_purchases grid removed — favorites shown in horizontal scroller above -->
 </section>
 {% endblock %}
+        <style>
+        .related-row, .related-row * {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -ms-user-select: none !important;
+        }
+        </style>
+        <script>
+        // Enable drag-to-scroll for all .related-row elements, and prevent selection while dragging
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.related-row').forEach(function(row){
+                let isDown = false, startX, scrollLeft;
+                row.addEventListener('mousedown', function(e){
+                    isDown = true;
+                    row.classList.add('dragging');
+                    startX = e.pageX - row.offsetLeft;
+                    scrollLeft = row.scrollLeft;
+                    document.body.style.userSelect = 'none';
+                });
+                row.addEventListener('mouseleave', function(){
+                    isDown = false;
+                    row.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                });
+                row.addEventListener('mouseup', function(){
+                    isDown = false;
+                    row.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                });
+                row.addEventListener('mousemove', function(e){
+                    if(!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - row.offsetLeft;
+                    const walk = (x - startX) * 1.2; // scroll speed
+                    row.scrollLeft = scrollLeft - walk;
+                });
+                // Touch support
+                row.addEventListener('touchstart', function(e){
+                    isDown = true;
+                    startX = e.touches[0].pageX - row.offsetLeft;
+                    scrollLeft = row.scrollLeft;
+                    document.body.style.userSelect = 'none';
+                });
+                row.addEventListener('touchend', function(){
+                    isDown = false;
+                    document.body.style.userSelect = '';
+                });
+                row.addEventListener('touchmove', function(e){
+                    if(!isDown) return;
+                    const x = e.touches[0].pageX - row.offsetLeft;
+                    const walk = (x - startX) * 1.2;
+                    row.scrollLeft = scrollLeft - walk;
+                });
+            });
+        });
+        </script>

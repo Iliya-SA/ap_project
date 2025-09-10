@@ -15,8 +15,16 @@
                         <h5 class="mt-2">{{ product.name }}</h5>
                         <p class="text-muted small">{{ product.description|truncatewords:15 }}</p>
                         
+
                         <p class="text-success fw-bold" style="color: #1b5e20;">
                             {{ product.price|intcomma }} تومان
+                        </p>
+                        <p class="mb-1">
+                            {% if product.stock > 0 %}
+                                <span class="badge bg-success">موجود</span>
+                            {% else %}
+                                <span class="badge bg-danger">ناموجود</span>
+                            {% endif %}
                         </p>
 
                         <p class="mb-2 d-flex align-items-center gap-1">

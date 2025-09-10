@@ -76,9 +76,21 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         return None  # جلوگیری از تلاش برای پیدا کردن Comment موجود
 
     def form_valid(self, form):
+        # Attach user and product, then save
         form.instance.user = self.request.user.profile
         form.instance.product = get_object_or_404(Product, pk=self.kwargs['pk'])
-        return super().form_valid(form)
+        self.object = form.save()
+
+        # If request is AJAX, return JSON so frontend can update inline without redirect
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'user': str(self.object.user),
+                'text': self.object.text,
+                'rating': self.object.rating,
+                'created_at': self.object.created_at.strftime('%Y/%m/%d %H:%M')
+            })
+
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse_lazy('product-detail', kwargs={'pk': self.kwargs['pk']})

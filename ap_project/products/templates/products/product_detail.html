@@ -131,10 +131,14 @@
     <!-- نوار بالا با علاقه‌مندی -->
     <nav class="top-navbar">
         <a href="{% url 'store' %}">← بازگشت به صفحه اصلی</a>
-        <a href="#" id="favorite-btn" class="favorite-link" data-url="{% url 'toggle-favorite' product.pk %}">
-            <span class="heart">{% if is_favorite %}❤️{% else %}🤍{% endif %}</span>
-            علاقه‌مندی
-        </a>
+        {% if user.is_authenticated %}
+            <a href="#" id="favorite-btn" class="favorite-link" data-url="{% url 'toggle-favorite' product.pk %}">
+                <span class="heart">{% if is_favorite %}❤️{% else %}🤍{% endif %}</span>
+                علاقه‌مندی
+            </a>
+        {% else %}
+            <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="favorite-link">🤍 علاقه‌مندی</a>
+        {% endif %}
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             var favBtn = document.getElementById('favorite-btn');
@@ -182,7 +186,11 @@
 
                 <p class="price-text">{{ product.price|floatformat:0|intcomma }} تومان</p>
             </div>
-            <a href="{% url 'add-to-cart' product.pk %}" class="btn btn-success btn-buy mt-3 w-100">افزودن به سبد خرید</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'add-to-cart' product.pk %}" class="btn btn-success btn-buy mt-3 w-100">افزودن به سبد خرید</a>
+            {% else %}
+                <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-success btn-buy mt-3 w-100">افزودن به سبد خرید</a>
+            {% endif %}
         </div>
     </div>
 
@@ -239,10 +247,29 @@
             <p class="text-muted">هیچ نظری ثبت نشده است.</p>
         {% endif %}
 
-        <div class="d-flex gap-2 mt-3">
+        <div class="d-flex gap-2 mt-3 align-items-start">
             <a href="{% url 'product-comments' product.pk %}" class="btn btn-outline-secondary">مشاهده همه نظرات</a>
-            <a href="{% url 'add-comment' product.pk %}" class="btn btn-success">افزودن نظر</a>
+
+            <!-- Inline comment form (AJAX) -->
+            {% if user.is_authenticated %}
+            <form id="inline-comment-form" class="d-flex gap-2 align-items-center" method="post" action="{% url 'add-comment' product.pk %}">
+                {% csrf_token %}
+                <select name="rating" id="rating" class="form-select form-select-sm" style="width:90px;">
+                    <option value="5">5 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="1">1 ★</option>
+                </select>
+                <textarea name="text" id="comment-text" class="form-control form-control-sm" rows="1" placeholder="نظر خود را بنویسید..." style="max-width:420px;"></textarea>
+                <button type="submit" id="submit-comment" class="btn btn-success btn-sm">ثبت</button>
+            </form>
+            {% else %}
+                <a href="{% url 'signin' %}?next={% url 'product-detail' product.pk %}" class="btn btn-success">برای ثبت نظر وارد شوید</a>
+            {% endif %}
         </div>
+
+        <div id="inline-comments-container"></div>
     </section>
 
 
@@ -290,6 +317,59 @@ document.addEventListener('DOMContentLoaded', function(){
             const x = e.touches[0].pageX - row.offsetLeft;
             const walk = (x - startX) * 1.2;
             row.scrollLeft = scrollLeft - walk;
+        });
+    });
+});
+</script>
+<script>
+// Inline comment form submission
+document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('inline-comment-form');
+    if(!form) return;
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const url = form.getAttribute('action');
+        const text = document.getElementById('comment-text').value.trim();
+        const rating = document.getElementById('rating').value;
+        if(!text){
+            alert('لطفاً متن نظر را وارد کنید.');
+            return;
+        }
+
+        // send as FormData so Django form parsing works
+        const formData = new FormData();
+        formData.append('text', text);
+        formData.append('rating', rating);
+        // include csrf token input if present in the form
+        const csrfInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+        if(csrfInput) formData.append('csrfmiddlewaretoken', csrfInput.value);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        })
+        .then(res => {
+            if(!res.ok) throw new Error('خطا در ارسال نظر');
+            return res.json();
+        })
+        .then(data => {
+            // prepend new comment to comments section
+            const container = document.querySelector('.comments-section');
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            div.innerHTML = `<div class="comment-header">${data.user} <span class="star-icon">★</span>${data.rating}</div><p>${data.text}</p><div class="comment-date">${data.created_at}</div>`;
+            container.insertBefore(div, container.querySelector('.d-flex') || container.firstChild);
+            // clear form
+            document.getElementById('comment-text').value = '';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('ثبت نظر ناموفق بود. دوباره تلاش کنید.');
         });
     });
 });
